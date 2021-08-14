@@ -1,0 +1,15 @@
+version: '3.3'
+services: 
+    db:
+        image: postgres:11.3-alpine
+        env_file:
+            - .env
+    backend:
+        build: ./backend
+        command: sh runserver.sh
+        volumes: 
+            - ./backend:/backend
+        ports: 
+            - 8000:8000
+        env_file: 
+            - .env

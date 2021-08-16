@@ -4,8 +4,14 @@
 ```bash
     sh start-django.sh
 ```
+- create docker component
+    - <a href="docker-compose.yml"> docker-compose.yml </a>
+    - <a href="backend/Dockerfile"> Dockerfile </a>
+    - <a href="backend/runserver.sh"> runserver.sh </a>
+    - <a href=".env"> .env </a>
 
 - edit django project settings
+
 ```python
 import os
 ...

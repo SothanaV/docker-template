@@ -1,2 +1,2 @@
 yarn
-yarn start
+yarn serve

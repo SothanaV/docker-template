@@ -1,6 +1,5 @@
 # python
 env/
-.env
 *.pyc
 **__pycache__/
 **migrations/

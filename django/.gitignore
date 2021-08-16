@@ -1,2 +1,13 @@
-__pycache__/
+# python
+env/
 *.pyc
+**__pycache__/
+**migrations/
+
+# js
+**node_modules/
+**package-lock.json
+
+# mac
+.DS_Store
+.vscode/

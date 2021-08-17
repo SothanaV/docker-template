@@ -1,3 +1,3 @@
-FROM node:10
+FROM node:16-slim
 ADD . /frontend
 WORKDIR /frontend

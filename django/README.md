@@ -53,6 +53,27 @@ CORS_ORIGIN_WHITELIST = [
 ]
 ```
 
+if use server-side render(ssr)
+- edit in ```settings.py```
+```python
+STATIC_URL = '/static/'
+STATIC_ROOT = f"/var/www/{os.environ.get('PROJECT_NAME')}/static/"
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
+MEDIA_URL = '/media/'
+MEDIA_ROOT = f"/var/www/{os.environ.get('PROJECT_NAME')}/media/"
+```
+- edit in ```urls.py```
+```python
+from django.conf import settings
+from django.conf.urls.static import static
+
+urlpatterns = [
+    ...
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+```
+
 ## Architech Backend
 
 ```

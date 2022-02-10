@@ -1,4 +1,4 @@
-while ! nc -w 1 -z db 5432;
+while ! nc -w 1 -z ${PROJECT_NAME}_db 5432;
 do sleep 5;
 done;
 

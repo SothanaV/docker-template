@@ -53,6 +53,17 @@ CORS_ORIGIN_WHITELIST = [
 ]
 ```
 
+- edit in ```backend/settings.py```
+```python
+from django.urls import path, include
+
+urlpatterns = [
+    ...
+    path('api/', include('api.urls'))
+    ...
+]
+```
+
 if use server-side render(ssr)
 - edit in ```settings.py```
 ```python
@@ -73,7 +84,6 @@ urlpatterns = [
     ...
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
-
 ## Architech Backend
 
 ```
@@ -116,4 +126,11 @@ DB_PORT=5432
 
 NODE_ENV=development
 CI=true
+```
+
+# Django command
+```must be exec in django container```
+- start app
+```sh
+python manage.py startapp 
 ```

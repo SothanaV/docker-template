@@ -1,16 +1,23 @@
 version: '3.3'
+
+volumes:
+    media: {}
+    static: {}
+
 services: 
     db:
-        container_name: ${PROJECT_NAME}_db
+        container_name: ${PROJECT_NAME}-db
         image: postgres:11.3-alpine
         env_file:
             - .env
     backend:
-        container_name: ${PROJECT_NAME}_backend
+        container_name: ${PROJECT_NAME}-backend
         build: ./backend
         command: sh runserver.sh
         volumes: 
             - ./backend:/backend
+            - media:/var/www/${PROJECT_NAME}/media/
+            - static:/var/www/${PROJECT_NAME}/static/
         ports: 
             - 8000:8000
         env_file: 

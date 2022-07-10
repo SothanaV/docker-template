@@ -1,7 +1,7 @@
 version: '3.3'
 services: 
     frontend:
-        container_name: ${PROJECT_NAME}_frontend
+        container_name: ${PROJECT_NAME}-frontend
         build: ./frontend
         command: sh run_frontend.sh
         volumes: 

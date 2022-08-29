@@ -19,7 +19,6 @@ import os
 SECRET_KEY = os.environ.get('DJANGO_SECRET')
 
 DEBUG = os.environ.get('STATE', None) == "dev"
-if DEBUG:print("STATE :", os.environ.get('STATE'))
 
 INSTALLED_APPS = [
     ...

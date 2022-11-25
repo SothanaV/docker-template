@@ -29,8 +29,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     ...
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 DATABASES = {

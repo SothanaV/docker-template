@@ -2,7 +2,6 @@
 env/
 *.pyc
 **__pycache__/
-**migrations/
 
 # js
 **node_modules/

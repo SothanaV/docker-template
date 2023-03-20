@@ -7,7 +7,7 @@ volumes:
 services: 
     db:
         container_name: ${PROJECT_NAME}-db
-        image: postgres:11.3-alpine
+        image: postgres:14.7-alpine
         env_file:
             - .env
     backend:

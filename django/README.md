@@ -43,22 +43,8 @@ DATABASES = {
     }
 }
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:30000',
-]
-```
-
-- edit in ```backend/settings.py```
-```python
-from django.urls import path, include
-
-urlpatterns = [
-    ...
-    path('api/', include('api.urls'))
-    ...
 ]
 ```
 
@@ -87,14 +73,6 @@ urlpatterns = [
 ```
 .
 ├── Dockerfile
-├── api
-│   ├── urls.py
-│   └── v1
-│   |   ├── routers.py
-│   |   ├── serializers.py
-│   |   └── viewsets.py
-|   |____
-|    ... v2
 ├── backend
 │   ├── __init__.py
 │   ├── asgi.py

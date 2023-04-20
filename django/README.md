@@ -46,6 +46,12 @@ DATABASES = {
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:30000',
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000')
+]
+
+SESSION_COOKIE_NAME=os.environ.get('PROJECT_NAME', "django")
 ```
 
 if use server-side render(ssr)
@@ -102,6 +108,8 @@ DB_PORT=5432
 
 NODE_ENV=development
 CI=true
+
+CSRF_TRUSTED_ORIGINS='<DOMAIN eg https://system.data.storemesh.com>'
 ```
 
 # Django command

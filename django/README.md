@@ -51,7 +51,7 @@ CSRF_TRUSTED_ORIGINS = [
     os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000')
 ]
 
-SESSION_COOKIE_NAME=os.environ.get('PROJECT_NAME', "django")
+SESSION_COOKIE_NAME = os.environ.get('PROJECT_NAME', "django")
 ```
 
 if use server-side render(ssr)

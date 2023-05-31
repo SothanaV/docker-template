@@ -1,1 +1,1 @@
-vue create frontend
+yarn create vite frontend --template vue

@@ -1,7 +1,7 @@
 FROM python:3.10-slim
 RUN apt-get update --fix-missing
 
-RUN apt install -y git netcat
+RUN apt install -y git netcat-traditional
 
 WORKDIR /backend
 ADD ./requirements.txt requirements.txt

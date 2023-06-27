@@ -1,0 +1,13 @@
+version: '3.3'
+
+services: 
+    jupyter:
+        container_name: ${PROJECT_NAME}-jupyter
+        build: ./jupyter
+        command: sh run-jupyter.sh
+        volumes: 
+            - ./jupyter:/jupyter
+        ports: 
+            - 8888:8888
+        env_file: 
+            - .env

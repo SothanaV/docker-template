@@ -3,7 +3,7 @@ services:
     frontend:
         container_name: ${PROJECT_NAME}-frontend
         build: ./frontend
-        command: sh run_frontend.sh
+        command: sh run_dev.sh
         volumes: 
             - ./frontend:/frontend
         ports: 

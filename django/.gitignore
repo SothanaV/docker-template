@@ -10,3 +10,6 @@ env/
 # mac
 .DS_Store
 .vscode/
+
+# django
+*.sqlite3

@@ -1,11 +1,12 @@
 version: '3.3'
 services: 
     frontend:
+        container_name: ${PROJECT_NAME}-frontend
         build: ./frontend
-        command: sh run-frontend-dev.sh
+        command: sh run-frontend.sh
         volumes: 
             - ./frontend:/frontend
         ports: 
-            - 5173:5173
+            - 8080:8080
         env_file: 
             - .env

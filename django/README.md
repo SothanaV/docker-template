@@ -72,6 +72,12 @@ from django.conf.urls.static import static
 
 urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 ```
+
+- optional securities `settings.py`
+```python
+SESSION_COOKIE_AGE=60*60*24 # sec
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+```
 ## Architech Backend
 
 ```

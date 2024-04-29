@@ -1,6 +1,13 @@
 import os
 import json
-from notebook.auth import passwd
+
+try:
+    # import old version jupyter
+    from notebook.auth import passwd
+except Exception as e:
+    pass
+else:
+    from jupyter_server.auth import passwd
 
 password = os.environ.get('JUPYTER_PASSWORD', 'password')
 password_hash = passwd(password)

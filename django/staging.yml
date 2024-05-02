@@ -13,7 +13,7 @@ services:
     backend:
         container_name: ${PROJECT_NAME}-backend
         build: ./backend
-        command: sh runserver.sh
+        command: sh runserver.sh 4
         volumes: 
             - ./backend:/backend
             - media:/var/www/${PROJECT_NAME}/media/

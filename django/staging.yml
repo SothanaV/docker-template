@@ -1,13 +1,14 @@
-version: '3.3'
-
 volumes:
     media: {}
     static: {}
+    db: {}
 
 services: 
     db:
         container_name: ${PROJECT_NAME}-db
-        image: postgres:14.7-alpine
+        image: postgres:15.2-alpine
+        volumes:
+          - db:/var/lib/postgresql/data
         env_file:
             - .env
     backend:

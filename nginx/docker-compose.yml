@@ -1,12 +1,10 @@
-version: '3.3'
-
 volumes:
     media: {}
     static: {}
 
 services: 
     nginx:
-        image: nginx:1.25.2
+        image: nginx:1.25.2-alpine
         ports:
             - 8000:8000
             - 8080:8080

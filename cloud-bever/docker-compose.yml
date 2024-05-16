@@ -1,0 +1,15 @@
+# image: https://hub.docker.com/r/dbeaver/cloudbeaver
+# config docs: https://github.com/dbeaver/cloudbeaver/wiki/Server-configuration#automatic-server-configuration
+# ref : https://github.com/Websoft9test/docker-cloudbeaver/blob/main/docker-compose.yml
+
+volumes:
+  cloudbeaver: {}
+
+services:
+    cloudbeaver:
+        container_name: ${PROJECT_NAME}-cloudbeaver
+        image: dbeaver/cloudbeaver:latest
+        ports:
+            - 8978:8978
+        volumes: 
+            - cloudbeaver:/opt/cloudbeaver/workspace            

@@ -8,7 +8,9 @@ data = {
     'auths': {
         'registry.gitlab.com': {
             'username': user, 
-            'password': password, 
+            'password': password,
+            'username_b64': base64.b64encode(user.encode()).decode(),
+            'password_b64': base64.b64encode(password.encode()).decode(),
             'auth': base64.b64encode(f"{user}:{password}".encode()).decode()
         }
     }

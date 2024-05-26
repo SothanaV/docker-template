@@ -1,0 +1,15 @@
+# python
+env/
+*.pyc
+**__pycache__/
+
+# js
+**node_modules/
+**package-lock.json
+
+# mac
+.DS_Store
+.vscode/
+
+# django
+*.sqlite3

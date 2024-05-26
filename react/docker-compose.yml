@@ -1,5 +1,6 @@
 services: 
     frontend:
+        container_name: ${PROJECT_NAME}-frontend
         build: ./frontend
         command: sh run-frontend-dev.sh
         volumes: 

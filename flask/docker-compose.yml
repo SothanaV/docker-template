@@ -1,0 +1,11 @@
+services: 
+    backend:
+        container_name: ${PROJECT_NAME}-backend
+        build: ./backend
+        command: sh run-server-dev.sh
+        volumes: 
+            - ./backend:/backend
+        ports: 
+            - 5050:5000
+        env_file: 
+            - .env

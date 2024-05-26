@@ -1,4 +1,4 @@
-while ! nc -w 1 -z ${DB_HOST} ${DB_PORT};
+while ! nc -w 1 -z ${POSTGRES_HOST} ${POSTGRES_PORT};
 do sleep 5;
 done;
 

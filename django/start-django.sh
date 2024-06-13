@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 python3 -m venv env
 source env/bin/activate
-pip install django psycopg2-binary djangorestframework django-cors-headers gunicorn
+pip install django psycopg2-binary djangorestframework django-cors-headers drf-yasg gunicorn
 django-admin startproject backend
 cd backend
 mkdir static

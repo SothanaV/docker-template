@@ -43,9 +43,7 @@ DATABASES = {
     }
 }
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:30000',
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
     os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000')

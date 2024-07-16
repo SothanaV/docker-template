@@ -17,8 +17,8 @@ services:
         command: sh runserver.sh 4
         volumes: 
             - ./backend:/backend
-            - media:/var/www/${PROJECT_NAME}/media/
-            - static:/var/www/${PROJECT_NAME}/static/
+            - media:/var/www/media/
+            - static:/var/www/static/
         ports: 
             - 8000:8000
         env_file: 

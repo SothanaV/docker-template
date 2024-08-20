@@ -10,7 +10,7 @@ services:
             - 8000:8000
             - 8080:8080
         volumes:
-            - ./config/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+            - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
             - media:/var/www/media/
             - static:/var/www/static/
         env_file:

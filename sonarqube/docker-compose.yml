@@ -1,0 +1,32 @@
+volumes:
+  db: {}
+
+networks:
+  sonar:
+    external: true
+  sonar-internal:
+    external: false
+
+services:
+  db:
+    image: postgres:16.3-alpine
+    container_name: ${PROJECT_NAME}-db
+    env_file:
+      - .env
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - sonar-internal
+
+  sonarqube:
+    image: sonarqube:10.6.0-community
+    container_name: ${PROJECT_NAME}-sonarqube
+    ports:
+      - 9000:9000
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - sonar
+      - sonar-internal

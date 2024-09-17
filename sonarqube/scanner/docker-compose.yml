@@ -1,0 +1,12 @@
+networks:
+  sonar:
+    external: true
+
+services:
+  scanner:
+    image: sonarsource/sonar-scanner-cli:10.0
+    networks: 
+      - sonar
+    volumes:
+      - ../../django/backend:/usr/src/backend # map to your project dir
+      - ./sonar-project.properties:/usr/src/sonar-project.properties

@@ -1,0 +1,11 @@
+services:
+    backend:
+        container_name: ${PROJECT_NAME}-backend
+        build: ./backend
+        command: bash runserver.sh
+        volumes:
+            - ./backend:/backend
+        ports:
+            - 3000:3000
+        env_file:
+            - .env

@@ -1,0 +1,11 @@
+volumes:
+  db: {}
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ${PROJECT_NAME}-db
+    ports:
+      - 3306:3306
+    volumes:
+      - db:/var/lib/mysql

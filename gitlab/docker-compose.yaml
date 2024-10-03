@@ -7,9 +7,6 @@ services:
     environment:
         GITLAB_OMNIBUS_CONFIG: |
             external_url 'http://localhost'
-            gitlab_rails['gitlab_shell_ssh_port'] = 2224
-    env_file:
-        - .env
     ports:
         - '80:80'         # Web interface
         - '443:443'       # HTTPS (optional)

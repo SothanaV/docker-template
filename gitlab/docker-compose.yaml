@@ -1,0 +1,19 @@
+services:
+  gitlab:
+    image: 'gitlab/gitlab-ce:17.4.1-ce.0'
+    container_name: gitlab
+    restart: always
+    hostname: 'localhost'
+    environment:
+        GITLAB_OMNIBUS_CONFIG: |
+            external_url 'http://localhost'
+            gitlab_rails['gitlab_shell_ssh_port'] = 2224
+    env_file:
+        - .env
+    ports:
+        - '80:80'         # Web interface
+        - '443:443'       # HTTPS (optional)
+    volumes:
+        - './config:/etc/gitlab'
+        - './logs:/var/log/gitlab'
+        - './data:/var/opt/gitlab'

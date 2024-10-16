@@ -1,0 +1,24 @@
+volumes:
+  open-webui: {}
+  db: {}
+
+services:
+    db:
+        container_name: ${PROJECT_NAME}-db
+        image: postgres:16.3-alpine
+        volumes:
+          - db:/var/lib/postgresql/data
+        env_file:
+            - .env
+
+    open-webui:
+        container_name: ${PROJECT_NAME}-open-webui
+        image: ghcr.io/open-webui/open-webui:main
+        env_file:
+            - .env
+        volumes:
+            - open-webui:/app/backend/data
+        ports:
+            - 8080:8080
+        depends_on:
+            - db

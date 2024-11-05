@@ -2,8 +2,7 @@ python3 -m venv env
 source env/bin/activate
 pip install fastapi "uvicorn[standard]"
 mkdir backend
-echo "from typing import Union
-
+echo "
 from fastapi import FastAPI
 
 app = FastAPI()

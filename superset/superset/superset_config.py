@@ -1,0 +1,35 @@
+import os
+
+SECRET_KEY = os.environ.get('SUPERSET_SECRET_KEY', 'SECRET')
+
+ROW_LIMIT = 5000
+SUPERSET_WORKERS = 4
+CSRF_ENABLED = True
+ENABLE_PROXY_FIX=True
+
+CACHE_CONFIG = {
+    'CACHE_TYPE': 'redis',
+    'CACHE_DEFAULT_TIMEOUT': 300,
+    'CACHE_KEY_PREFIX': 'superset_',
+    'CACHE_REDIS_URL': f"redis://{os.environ.get('REDIS_URI')}/1"
+}
+
+DB_CONFIG = {
+    'USERNAME': os.environ.get('POSTGRES_SUPERSET_USER'),
+    'PASSWORD': os.environ.get('POSTGRES_SUPERSET_PASSWORD'),
+    'HOST': os.environ.get('POSTGRES_SUPERSET_HOST'),
+    'PORT': os.environ.get('POSTGRES_SUPERSET_PORT'),
+    'DB': os.environ.get('POSTGRES_SUPERSET_DB')
+}
+SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB}'.format(**DB_CONFIG)
+
+SQLALCHEMY_TRACK_MODIFICATIONS = True
+SUPERSET_WEBSERVER_TIMEOUT = 60000
+
+## Custom user info
+SQLLAB_TIMEOUT = 60000
+AUTH_ROLE_PUBLIC = 'Public'
+WTF_CSRF_ENABLED = False
+PUBLIC_ROLE_LIKE = "Gamma"
+# PUBLIC_ROLE_LIKE_GAMMA = True
+HTTP_HEADERS = {}

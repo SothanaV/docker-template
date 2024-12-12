@@ -1,0 +1,49 @@
+# traefik.toml
+################################################################
+# Global configuration
+################################################################
+
+# defaultEntryPoints must be at the top because it should not be in any table below
+defaultEntryPoints = ["http", "https"]
+
+# Entrypoints, http and https
+[entryPoints]
+
+# http should be redirected to https
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+
+# https is the default
+  [entryPoints.https]
+  address = ":443"
+
+    [entryPoints.https.tls]
+
+[web]
+# Port for the status page
+address = ":8080"
+
+# Enable Basic authentication in an entry point
+# Passwords are encoded in MD5: you can use htpasswd to generate them.
+[web.auth.basic]
+  users = ["<USERNAME HASH PASSWORD>"]
+
+# Enable ACME (Let's Encrypt): automatic SSL
+[acme]
+# caServer = "https://acme-staging.api.letsencrypt.org/directory"
+email = "<YOUR EMAIL>"
+storage = "acme.json" # or "traefik/acme/account" if using KV store
+entryPoint = "https"
+onDemand = false
+OnHostRule = true
+
+[acme.httpChallenge]
+  entryPoint = "http"
+
+[docker]
+endpoint = "unix:///var/run/docker.sock"
+domain = "<TRAEFIK DOMAIN>"
+watch = true
+exposedbydefault = false

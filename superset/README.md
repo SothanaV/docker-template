@@ -11,9 +11,13 @@ docker compose up
 - Login as admin
 - Settings > List Roles
 - delete `Public` role
-- edit `Gramma` role
+- edit `Gamma` role
     - add permisson
-        - explor on superset
-        - explot json on superset
-- copy `Gramma` role and rename to `Public`
+        - can explore json on Superset
+        - can dashboard on Superset
+        - all database access on all_database_access
+- copy `Gamma` role and rename to `Public`
+    - check box `Gamma`
+    - action
+    - Copy Role
 - test and hope sucess

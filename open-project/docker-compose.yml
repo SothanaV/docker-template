@@ -10,14 +10,10 @@ services:
             - "pgdata:/var/lib/postgresql/data"
         env_file:
             - .env
-        networks:
-            - backend
 
     cache:
         container_name: ${PROJECT_NAME}-cache
         image: memcached
-        networks:
-            - backend
 
     web:
         container_name: ${PROJECT_NAME}-web

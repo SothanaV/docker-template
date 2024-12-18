@@ -1,0 +1,79 @@
+volumes:
+  pgdata:
+  opdata:
+
+services:
+    db:
+        container_name: ${PROJECT_NAME}-db
+        image: postgres:17-alpine
+        volumes:
+            - "pgdata:/var/lib/postgresql/data"
+        env_file:
+            - .env
+        networks:
+            - backend
+
+    cache:
+        container_name: ${PROJECT_NAME}-cache
+        image: memcached
+        networks:
+            - backend
+
+    web:
+        container_name: ${PROJECT_NAME}-web
+        image: openproject/openproject:15-slim
+        env_file:
+            - .env
+        volumes:
+            - "opdata:/var/openproject/assets"
+        command: "./docker/prod/web"
+        ports:
+            - 8080:8080
+        depends_on:
+            - db
+            - cache
+
+    worker:
+        container_name: ${PROJECT_NAME}-worker
+        image: openproject/openproject:15-slim
+        env_file:
+            - .env
+        volumes:
+            - "opdata:/var/openproject/assets"
+        command: "./docker/prod/worker"
+        depends_on:
+            - db
+            - cache
+            - seeder
+
+    cron:
+        container_name: ${PROJECT_NAME}-cron
+        image: openproject/openproject:15-slim
+        env_file:
+            - .env
+        volumes:
+            - "opdata:/var/openproject/assets"
+        command: "./docker/prod/cron"
+        depends_on:
+            - db
+            - cache
+            - seeder
+
+    seeder:
+        container_name: ${PROJECT_NAME}-seeder
+        image: openproject/openproject:15-slim
+        restart: on-failure
+        env_file:
+            - .env
+        volumes:
+            - "opdata:/var/openproject/assets"
+        command: "./docker/prod/seeder"
+
+    autoheal:
+        image: willfarrell/autoheal:1.2.0
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+        environment:
+            AUTOHEAL_CONTAINER_LABEL: autoheal
+            AUTOHEAL_START_PERIOD: 600
+            AUTOHEAL_INTERVAL: 30

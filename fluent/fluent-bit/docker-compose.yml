@@ -1,0 +1,13 @@
+services:
+    fluent-bit:
+        image: fluent/fluent-bit:1.8
+        command:
+          - /fluent-bit/bin/fluent-bit
+          - --config=/etc/fluent-bit/fluent-bit.conf
+        environment:
+          - FLB_ES_HOST=elasticsearch
+          - FLB_ES_PORT=9200
+        ports:
+          - 18000:18000
+        volumes:
+          - ./conf/:/etc/fluent-bit/:ro

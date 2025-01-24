@@ -1,0 +1,13 @@
+volumes:
+    es_data: {}
+services:
+    elasticsearch:
+        image: elasticsearch:7.17.27
+        restart: on-failure
+        mem_limit: 8g
+        environment:
+            - discovery.type=single-node
+            - xpack.security.enabled=true
+            - ELASTIC_PASSWORD=password
+        volumes:
+            - es_data:/usr/share/elasticsearch/data

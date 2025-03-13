@@ -1,0 +1,66 @@
+services:
+    ollama-1:
+        container_name: ollama-1
+        # image: ollama/ollama:0.5.12
+        image: ollama/ollama:0.6.0
+        runtime: nvidia
+        volumes:
+            - ./ollama:/root/.ollama
+        environment:
+            - OLLAMA_KEEP_ALIVE=-1
+            - OLLAMA_NUM_PARALLEL=16
+            - CUDA_VISIBLE_DEVICES=0
+    ollama-2:
+        container_name: ollama-2
+        # image: ollama/ollama:0.5.12
+        image: ollama/ollama:0.6.0
+        runtime: nvidia
+        volumes:
+            - ./ollama:/root/.ollama
+        environment:
+            - OLLAMA_KEEP_ALIVE=-1
+            - OLLAMA_NUM_PARALLEL=16
+            - CUDA_VISIBLE_DEVICES=1
+    ollama-3:
+        container_name: ollama-3
+        # image: ollama/ollama:0.5.12
+        image: ollama/ollama:0.6.0
+        runtime: nvidia
+        volumes:
+            - ./ollama:/root/.ollama
+        environment:
+            - OLLAMA_KEEP_ALIVE=-1
+            - OLLAMA_NUM_PARALLEL=16
+            - CUDA_VISIBLE_DEVICES=2
+    ollama-4:
+        container_name: ollama-4
+        # image: ollama/ollama:0.5.12
+        image: ollama/ollama:0.6.0
+        runtime: nvidia
+        volumes:
+            - ./ollama:/root/.ollama
+        environment:
+            - OLLAMA_KEEP_ALIVE=-1
+            - OLLAMA_NUM_PARALLEL=16
+            - CUDA_VISIBLE_DEVICES=3
+            
+    nginx:
+        container_name: nginx
+        image: nginx
+        entrypoint: /bin/sh -c "sleep 5 && nginx -g 'daemon off;'"
+        ports:
+            - 11434:11434
+        volumes:
+            - ./config/nginx.conf:/etc/nginx/nginx.conf  # Mount as the main config file
+            - ./config/default.conf:/etc/nginx/conf.d/default.conf  # Server block only
+        environment:
+            NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".conf"
+
+    puller:
+        build: ./script
+        command: bash run.sh
+        volumes:
+            - ./script:/script
+        environment:
+            - PYTHONUNBUFFERED=1
+            - MODEL_NAMES=llama3.3,gemma3:27b

@@ -9,7 +9,6 @@ services:
         environment:
             - OLLAMA_KEEP_ALIVE=-1
             - OLLAMA_NUM_PARALLEL=16
-            - CUDA_VISIBLE_DEVICES=0
     ollama-2:
         container_name: ollama-2
         # image: ollama/ollama:0.5.12
@@ -64,3 +63,11 @@ services:
         environment:
             - PYTHONUNBUFFERED=1
             - MODEL_NAMES=llama3.3,gemma3:27b
+    
+    balancer:
+        build: ./balancer
+        command: bash run-server.sh
+        ports:
+            - 11435:11435
+        volumes:
+          - ./balancer:/balancer

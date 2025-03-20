@@ -1,0 +1,11 @@
+volumes:
+  meilisearch: {}
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v1.13
+    volumes:
+      - meilisearch:/meili_data
+    ports:
+      - 7700:7700
+    environment:
+      - MEILI_MASTER_KEY=qwer1234

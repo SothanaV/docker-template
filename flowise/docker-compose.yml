@@ -1,0 +1,32 @@
+volumes:
+  flowise_data:
+  postgres_data:
+  redis_data:
+services:
+  db:
+    image: postgres:17.3-alpine
+    container_name: flowise_db
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: flowise_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+  flowise:
+    image: flowiseai/flowise:2.2.7
+    container_name: flowise
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - flowise_data:/root/.flowise

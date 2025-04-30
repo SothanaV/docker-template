@@ -2,12 +2,11 @@ import os
 import json
 
 try:
-    # import old version jupyter
-    from notebook.auth import passwd
-except Exception as e:
-    pass
-else:
+    # Try importing from the modern jupyter_server module (used in JupyterLab)
     from jupyter_server.auth import passwd
+except ImportError:
+    # Fallback for older Jupyter versions
+    from notebook.auth import passwd
 
 password = os.environ.get('JUPYTER_PASSWORD', 'password')
 password_hash = passwd(password)

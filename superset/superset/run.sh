@@ -14,7 +14,7 @@ echo "======= init superset ======="
 superset init
 
 echo "======= install package ======="
-pip install -r requirements.txt
+pip install -r script/requirements.txt
 
 # superset run -p 8088 -h 0.0.0.0 --with-threads --no-debug
 gunicorn \

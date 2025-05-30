@@ -1,13 +1,18 @@
 # build stage
-FROM node:22 as build-stage
+FROM node:20 as build-stage
+# build stage
 WORKDIR /app
-ENV BASE_API=BASE_API_PLACEHOLDER
+ENV VITE_API_URL=VITE_API_URL_PLACEHOLDER
+ENV VITE_FRONTEND_URL=VITE_FRONTEND_URL_PLACEHOLDER
+
+
 RUN npm install -g http-server serve
+RUN yarn add @babel/plugin-proposal-optional-chaining --dev
 COPY ./package.json /app/package.json
 COPY ./ /app
+RUN ls -la
 RUN yarn
 RUN yarn build
-
 # production stage
 FROM nginx:stable-alpine as production-stage
 WORKDIR /app

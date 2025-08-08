@@ -13,7 +13,7 @@ services:
 
     open-webui:
         container_name: ${PROJECT_NAME}-open-webui
-        image: ghcr.io/open-webui/open-webui:main
+        image: ghcr.io/open-webui/open-webui:0.3.13
         env_file:
             - .env
         volumes:

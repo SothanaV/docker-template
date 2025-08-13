@@ -1,0 +1,7 @@
+asyncpg==0.30.0
+apache-airflow-providers-fab==2.3.0
+apache-airflow-providers-cncf-kubernetes==10.6.1
+psycopg2-binary==2.9.10
+pendulum==3.1.0
+statsd==4.0.1
+triad==0.9.8

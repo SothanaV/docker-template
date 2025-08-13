@@ -1,0 +1,51 @@
+networks:
+  kedro:
+    external: true
+  internal:
+   external: false
+services:
+  postgres:
+    image: postgres:17.5-alpine
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    networks:
+      - internal
+
+  airflow-apiserver:
+    image: my-airflow
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    environment:
+      AIRFLOW__WEBSERVER__PORT: 8080
+    volumes:
+      - ./logs:/opt/airflow/logs
+    ports:
+      - "8080:8080"
+    command: api-server
+    networks:
+      - internal
+
+  airflow-scheduler:
+    image: my-airflow
+    depends_on:
+      - airflow-apiserver
+    volumes:
+      - ./logs:/opt/airflow/logs
+    env_file:
+      - .env
+    command: scheduler
+    networks:
+      - kedro
+      - internal
+
+  airflow-dag-processor:
+    image: my-airflow
+    command: dag-processor
+    env_file:
+      - .env
+    networks:
+      - internal

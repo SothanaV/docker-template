@@ -6,4 +6,5 @@ pendulum==3.1.0
 statsd==4.0.1
 triad==0.9.8
 
-dsmemail==0.0.6
+dsmemail==0.0.7
+dsm-services==0.0.13

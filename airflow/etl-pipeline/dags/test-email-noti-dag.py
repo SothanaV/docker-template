@@ -6,10 +6,12 @@ from airflow import DAG
 from airflow.operators.python import ExternalPythonOperator
 from airflow.models import Variable
 
-import os
-os.environ['DSM_EMAIL_URI'] = Variable.get("DSM_EMAIL_URI", default_var="https://email-service.data.storemesh.com", deserialize_json=False) 
-os.environ['DSM_EMAIL_APIKEY'] = Variable.get("DSM_EMAIL_APIKEY", default_var="API_KEY", deserialize_json=False)
+from dsm_services.airflow import utils as email_utils
 import dsmemail
+
+DSM_EMAIL_URI = Variable.get("DSM_EMAIL_URI", default_var="https://email-service.data.storemesh.com", deserialize_json=False) 
+DSM_EMAIL_APIKEY = Variable.get("DSM_EMAIL_APIKEY", default_var="API_KEY", deserialize_json=False)
+SITE_NAME = Variable.get("SITE_NAME", default_var='', deserialize_json=False)
 ALERT_EMAILS = Variable.get("ALERT_EMAILS", default_var='[]', deserialize_json=True)
 
 def run(
@@ -30,23 +32,19 @@ def run(
     func = import_from_string(fn)
     func()
 
+
+
 def task_failure_alert(context):
     print(context)
     print(ALERT_EMAILS)
-    dag_id = context['dag'].dag_id
-    task_id = context['task_instance'].task_id
-    execution_date = context['dag_run'].logical_date
 
-    subject = f"Airflow alert: {dag_id}.{task_id} failed"
-    body = f"""
-    DAG: {dag_id}<br>
-    Task: {task_id}<br>
-    Execution Time: {execution_date}<br>
-    """
+    subject, body = email_utils.create_notice_email(site_name=SITE_NAME, context=context)
     status = dsmemail.sendEmail(
         subject=subject, 
         message=body, 
         emails=ALERT_EMAILS,
+        host=DSM_EMAIL_URI,
+        api_key=DSM_EMAIL_APIKEY
     )
     print(status)
 

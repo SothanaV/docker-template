@@ -56,12 +56,12 @@ if use server-side render(ssr)
 - edit in ```settings.py```
 ```python
 STATIC_URL = '/static/'
-STATIC_ROOT = f"/var/www/static/"
+STATIC_ROOT = '/var/www/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
 MEDIA_URL = '/media/'
-MEDIA_ROOT = f"/var/www/media/"
+MEDIA_ROOT = '/var/www/media/'
 ```
 - edit in ```urls.py```
 ```python

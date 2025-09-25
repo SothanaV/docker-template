@@ -1,0 +1,9 @@
+services:
+    zap-web:
+        image: zaproxy/zap-stable:2.16.0
+        command: bash run-zap-web.sh
+        environment:
+            - PYTHONUNBUFFERED=1
+        volumes:
+          - ./output:/zap/wrk
+          - ./config/run-zap-web.sh:/zap/run-zap-web.sh

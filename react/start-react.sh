@@ -1,1 +1,1 @@
-yarn create vite frontend --template react
+yarn create vite frontend --template react-ts

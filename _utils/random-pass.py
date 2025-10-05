@@ -1,6 +1,8 @@
 import random as rd
 import string
 import re
+import os
+from pathlib import Path
 
 kind = {
     '1': string.ascii_letters,
@@ -13,5 +15,16 @@ for k, v in kind.items():
 
 pass_type = input("Please select (1-3) for random type : ")
 length = input("Please input length (1-255) : ")
+name = input("Please input name : ")
+output = ''.join(rd.choices(kind.get(pass_type), k=int(length)))
 
-print(f"\t PASSWORD : {''.join(rd.choices(kind.get(pass_type), k=int(length)))}")
+output_path = Path.home() / 'Desktop/random-pass.txt'
+
+if not os.path.exists(output_path):
+    with open(output_path, 'a') as f:
+        f.write(f'name\tpass\n')
+
+with open(output_path, 'a') as f:
+    f.write(f"{name}\t{output}\n")
+
+print(f"\t {name} PASSWORD : {output}")

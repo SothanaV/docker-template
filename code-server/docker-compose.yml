@@ -1,0 +1,9 @@
+version: '3'
+services:
+  vscode:
+    build: .
+    container_name: code-server 
+    ports:
+      - 8080:8080    
+    volumes:
+      - ".config:/home/coder/.config"

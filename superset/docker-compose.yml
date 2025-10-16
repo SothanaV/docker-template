@@ -1,12 +1,13 @@
 volumes:
     db-superset: {}
+    redis-db: {}
 
 services: 
     redis:
         container_name: ${PROJECT_NAME}-redis
         image: redis:7.2-alpine
         volumes:
-            - redis_db:/data
+            - redis-db:/data
         ports:
             - 6379:6379
             
@@ -23,7 +24,7 @@ services:
             POSTGRES_DB: "${POSTGRES_SUPERSET_DB}"
         
     superset:
-        image: amancevice/superset:4.1.0
+        build: ./superset
         container_name: ${PROJECT_NAME}-superset
         volumes:
           - ./superset:/home/superset/script

@@ -1,0 +1,37 @@
+services:
+  registry:
+    image: registry:3
+    container_name: registry
+    env_file:
+      - .env
+    environment:
+      REGISTRY_LOG_LEVEL: info
+      REGISTRY_HTTP_ADDR: :5000
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      # Enable basic auth (htpasswd file)
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    volumes:
+      - ./auth:/auth
+      - ./data:/var/lib/registry
+      - ./registry/config.yml:/etc/docker/registry/config.yml:ro
+    ports:
+      - "5005:5000"
+
+  ui:
+    image: quiq/registry-ui:0.10.4
+    container_name: registry-ui
+    depends_on:
+      - registry
+    environment:
+      # - REGISTRY_TITLE=${REGISTRY_TITLE:-Private Registry}
+      - REGISTRY_HOSTNAME=registry:5000
+      - REGISTRY_INSECURE=true
+      # - DELETE_IMAGES=true
+      # - SINGLE_SIGN_ON=false
+      # - REGISTRY_SECURED=true
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./config.yml:/opt/config.yml:ro

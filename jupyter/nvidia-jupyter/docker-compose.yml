@@ -1,0 +1,17 @@
+services: 
+    jupyter:
+        container_name: ${PROJECT_NAME}-jupyter
+        runtime: nvidia
+        build: ./jupyter
+        command: bash run-jupyter.sh
+        volumes: 
+            - ./jupyter:/jupyter/code
+        ports: 
+            - 8898:8888
+        env_file: 
+            - .env
+        deploy:
+            resources:
+                limits:
+                    cpus: "8"
+                    memory: 16GB

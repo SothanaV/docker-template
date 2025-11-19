@@ -1,0 +1,1 @@
+fastmcp run server.py -t http --host 0.0.0.0

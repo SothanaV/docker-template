@@ -1,5 +1,5 @@
 # build stage
-FROM node:22 as build-stage
+FROM node:24-slim as build-stage
 # build stage
 WORKDIR /app
 ENV VITE_API_URL=VITE_API_URL_PLACEHOLDER

@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.operators.python import ExternalPythonOperator
+from airflow.operators.empty import EmptyOperator
+from airflow.utils.trigger_rule import TriggerRule
 from airflow.models import Variable
 
 from dsm_services.airflow import utils as email_utils
@@ -48,7 +50,21 @@ def task_failure_alert(context):
     )
     print(status)
 
-    
+def task_success_alert(context):
+    print(context)
+    print(ALERT_EMAILS)
+
+    subject, body = email_utils.create_success_email(site_name=SITE_NAME, context=context)
+    # subject, body = create_success_email(site_name=SITE_NAME, context=context)
+    status = dsmemail.sendEmail(
+        subject=subject, 
+        message=body, 
+        emails=ALERT_EMAILS,
+        host=DSM_EMAIL_URI,
+        api_key=DSM_EMAIL_APIKEY
+    )
+    print(status)
+
 
 venv_cache_path = "/home/airflow/venv/"
 
@@ -59,6 +75,7 @@ with DAG(
     # https://airflow.apache.org/docs/stable/scheduler.html#dag-runs
     schedule="* * * * *",
     catchup=False,
+    on_success_callback=task_success_alert,
     # Default settings applied to all tasks
     default_args=dict(
         owner="airflow",
@@ -67,7 +84,7 @@ with DAG(
         email_on_retry=False,
         retries=0,
         retry_delay=timedelta(seconds=5),
-        on_failure_callback=task_failure_alert
+        on_failure_callback=task_failure_alert,
     )
 ) as dag:
     tasks = {
@@ -99,5 +116,11 @@ with DAG(
 
     }
 
-    tasks["hello"] >> tasks["hi"]
+    success_notify = EmptyOperator(
+        task_id="notify_success",
+        trigger_rule=TriggerRule.ALL_SUCCESS,
+        on_success_callback=task_success_alert,
+    )
 
+    tasks["hello"] >> tasks["hi"]
+    list(tasks.values()) >> success_notify

@@ -8,7 +8,6 @@ from airflow.operators.empty import EmptyOperator
 from airflow.utils.trigger_rule import TriggerRule
 from airflow.models import Variable
 
-from dsm_services.airflow import utils as email_utils
 import dsmemail
 
 DSM_EMAIL_URI = Variable.get("DSM_EMAIL_URI", default_var="https://email-service.data.storemesh.com", deserialize_json=False) 
@@ -40,7 +39,7 @@ def task_failure_alert(context):
     print(context)
     print(ALERT_EMAILS)
 
-    subject, body = email_utils.create_notice_email(site_name=SITE_NAME, context=context)
+    subject, body = dsmemail.utils.airflow_email.create_notice_email(site_name=SITE_NAME, context=context)
     status = dsmemail.sendEmail(
         subject=subject, 
         message=body, 
@@ -54,7 +53,7 @@ def task_success_alert(context):
     print(context)
     print(ALERT_EMAILS)
 
-    subject, body = email_utils.create_success_email(site_name=SITE_NAME, context=context)
+    subject, body = dsmemail.utils.airflow_email.create_success_email(site_name=SITE_NAME, context=context)
     # subject, body = create_success_email(site_name=SITE_NAME, context=context)
     status = dsmemail.sendEmail(
         subject=subject, 

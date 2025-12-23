@@ -2,7 +2,7 @@ volumes:
     data: {}
 services:
     oracle:
-        image: gvenzl/oracle-free:latest
+        image: gvenzl/oracle-free:23-full
         environment:
             - ORACLE_RANDOM_PASSWORD=true
             - APP_USER=my_user
@@ -10,4 +10,4 @@ services:
         ports:
             - 1521:1521
         volumes:
-          - data:/opt/oracle/oradata
+            - data:/opt/oracle/oradata

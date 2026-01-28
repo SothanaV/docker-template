@@ -22,6 +22,8 @@ services:
     redis-insight2:
         container_name: ${PROJECT_NAME}-redis-insight
         image: redislabs/redisinsight:2.66
+        volumes:
+            - redisinsight_data:/data
         env_file:
             - .env
         ports:

@@ -9,7 +9,7 @@ networks:
 
 services:
   db:
-    image: postgres:16.3-alpine
+    image: postgres:18-alpine
     container_name: ${PROJECT_NAME}-db
     env_file:
       - .env
@@ -19,7 +19,7 @@ services:
       - sonar-internal
 
   sonarqube:
-    image: sonarqube:10.6.0-community
+    image: sonarqube:26.1.0.118079-community
     container_name: ${PROJECT_NAME}-sonarqube
     ports:
       - 9000:9000

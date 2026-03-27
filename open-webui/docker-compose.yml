@@ -5,15 +5,15 @@ volumes:
 services:
     db:
         container_name: ${PROJECT_NAME}-db
-        image: postgres:16.3-alpine
+        image: postgres:8-alpine
         volumes:
-          - db:/var/lib/postgresql/data
+            - db:/var/lib/postgresql/data
         env_file:
             - .env
 
     open-webui:
         container_name: ${PROJECT_NAME}-open-webui
-        image: ghcr.io/open-webui/open-webui:0.6.0
+        image: ghcr.io/open-webui/open-webui:0.8.12
         env_file:
             - .env
         volumes:

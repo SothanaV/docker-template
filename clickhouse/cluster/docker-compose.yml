@@ -1,0 +1,57 @@
+services:
+  clickhouse-keeper:
+    image: clickhouse/clickhouse-keeper:latest
+    container_name: clickhouse-keeper
+    hostname: clickhouse-keeper
+    networks:
+      - ch_network
+    volumes:
+      - keeper_data:/var/lib/clickhouse-keeper
+      - ./config/keeper/keeper_config.xml:/etc/clickhouse-keeper/keeper_config.xml
+
+  # ClickHouse Node 1
+  clickhouse-node1:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-node1
+    hostname: clickhouse-node1
+    networks:
+      - ch_network
+    ports:
+      - "8123:8123" # HTTP Port
+      - "9000:9000" # Native Client Port
+    env_files:
+      - .env
+    volumes:
+      - ch_node1_data:/var/lib/clickhouse
+      - ./config/node1/config.d:/etc/clickhouse-server/config.d
+      - ./config/node1/users.d:/etc/clickhouse-server/users.d
+    depends_on:
+      - clickhouse-keeper
+
+  # ClickHouse Node 2
+  clickhouse-node2:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse-node2
+    hostname: clickhouse-node2
+    networks:
+      - ch_network
+    ports:
+      - "8124:8123" # Mapped to 8124 locally
+      - "9001:9000" # Mapped to 9001 locally
+    env_files:
+      - .env
+    volumes:
+      - ch_node2_data:/var/lib/clickhouse
+      - ./config/node2/config.d:/etc/clickhouse-server/config.d
+      - ./config/node2/users.d:/etc/clickhouse-server/users.d
+    depends_on:
+      - clickhouse-keeper
+
+networks:
+  ch_network:
+    driver: bridge
+
+volumes:
+  keeper_data:
+  ch_node1_data:
+  ch_node2_data:

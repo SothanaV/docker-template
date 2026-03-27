@@ -1,0 +1,10 @@
+services:
+  pipelines:
+      # image: ghcr.io/open-webui/pipelines:main
+      build: ./pipeline
+      ports:
+        - "9099:9099"
+      volumes:
+        - ./pipeline/pipelines:/app/pipelines
+      env_file:
+        - .env

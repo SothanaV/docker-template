@@ -5,12 +5,24 @@ volumes:
 services:
     db:
         container_name: ${PROJECT_NAME}-db
-        image: postgres:8-alpine
+        image: postgres:18-alpine
         volumes:
             - db:/var/lib/postgresql/data
         env_file:
             - .env
-
+    
+    qdrant:
+        image: qdrant/qdrant:latest
+        container_name: ${PROJECT_NAME}-qdrant
+        restart: unless-stopped
+        ports:
+            - 6333:6333 # REST API
+            - 6334:6334 # gRPC API
+        env_file:
+            - .env
+        volumes:
+            - qdrant_data:/qdrant/storage
+        
     open-webui:
         container_name: ${PROJECT_NAME}-open-webui
         image: ghcr.io/open-webui/open-webui:0.8.12

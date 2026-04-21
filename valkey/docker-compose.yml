@@ -1,0 +1,21 @@
+volumes:
+  valkey-data: {}
+  insight-data: {}
+services:
+  valkey:
+    image: valkey/valkey:9.0-alpine
+    volumes:
+      - valkey-data:/valkey
+    env_file:
+      - .env
+    ports:
+      - 6379:6379
+  redis-insight:
+    container_name: redis-insight
+    image: redislabs/redisinsight:2.66
+    volumes:
+      - insight-data:/data
+    env_file:
+      - .env
+    ports:
+      - 5540:5540

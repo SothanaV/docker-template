@@ -1,28 +1,28 @@
 <clickhouse>
-    <zookeeper>
-        <node>
-            <host>clickhouse-keeper</host>
-            <port>9181</port>
-        </node>
-    </zookeeper>
-
     <remote_servers>
         <my_cluster>
             <shard>
                 <internal_replication>true</internal_replication>
                 <replica>
-                    <host>clickhouse-node1</host>
+                    <host>clickhouse-01</host>
                     <port>9000</port>
                 </replica>
                 <replica>
-                    <host>clickhouse-node2</host>
+                    <host>clickhouse-02</host>
+                    <port>9000</port>
+                </replica>
+                <replica>
+                    <host>clickhouse-03</host>
                     <port>9000</port>
                 </replica>
             </shard>
         </my_cluster>
     </remote_servers>
 
-    <macros>
-        <shard>1</shard>
-        <replica>node1</replica> </macros>
+    <zookeeper>
+        <node>
+            <host>zookeeper</host>
+            <port>2181</port>
+        </node>
+    </zookeeper>
 </clickhouse>

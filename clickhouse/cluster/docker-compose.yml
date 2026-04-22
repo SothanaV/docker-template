@@ -24,7 +24,7 @@ services:
       - clickhouse-03
 
   clickhouse-01:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:25.8-alpine
     container_name: clickhouse-01
     hostname: clickhouse-01
     env_file:
@@ -39,7 +39,7 @@ services:
       - zookeeper
 
   clickhouse-02:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:25.8-alpine
     container_name: clickhouse-02
     hostname: clickhouse-02
     env_file:
@@ -54,7 +54,7 @@ services:
       - zookeeper
 
   clickhouse-03:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:25.8-alpine
     container_name: clickhouse-03
     hostname: clickhouse-03
     env_file:

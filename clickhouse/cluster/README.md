@@ -1,6 +1,6 @@
 # ClickHouse Cluster
 
-A two-node ClickHouse cluster with replication, coordinated by ClickHouse Keeper and fronted by an HAProxy load balancer.
+A three-node ClickHouse cluster with replication, coordinated by ZooKeeper and fronted by an HAProxy load balancer.
 
 ## Architecture
 
@@ -9,26 +9,36 @@ Client
   │
   ▼
 HAProxy (8123 / 9000)
-  ├──► clickhouse-node1 ─┐
-  └──► clickhouse-node2 ─┤
-                         ▼
-                 clickhouse-keeper
+  ├──► clickhouse-01
+  ├──► clickhouse-02
+  └──► clickhouse-03
+           │
+           ▼
+       zookeeper
 ```
 
 | Service | Role |
 |---------|------|
-| `clickhouse-keeper` | Distributed coordination (ZooKeeper replacement) |
-| `clickhouse-node1` | ClickHouse server — shard 1, replica node1 |
-| `clickhouse-node2` | ClickHouse server — shard 1, replica node2 |
+| `zookeeper` | Distributed coordination for replication |
+| `clickhouse-01` | ClickHouse server — shard 1, replica 1 |
+| `clickhouse-02` | ClickHouse server — shard 1, replica 2 |
+| `clickhouse-03` | ClickHouse server — shard 1, replica 3 |
 | `haproxy` | Round-robin load balancer with health checks |
 
 ## Ports
 
-| Port | Description |
-|------|-------------|
-| `8123` | ClickHouse HTTP interface (load balanced) |
-| `9000` | ClickHouse native protocol (load balanced) |
-| `8404` | HAProxy stats dashboard |
+| Port | Service | Description |
+|------|---------|-------------|
+| `8123` | HAProxy | ClickHouse HTTP interface (load balanced) |
+| `9000` | HAProxy | ClickHouse native protocol (load balanced) |
+| `8404` | HAProxy | Stats dashboard |
+| `18123` | clickhouse-01 | Direct HTTP access (debug) |
+| `18124` | clickhouse-02 | Direct HTTP access (debug) |
+| `18125` | clickhouse-03 | Direct HTTP access (debug) |
+| `19000` | clickhouse-01 | Direct native access (debug) |
+| `19001` | clickhouse-02 | Direct native access (debug) |
+| `19002` | clickhouse-03 | Direct native access (debug) |
+| `2181` | zookeeper | ZooKeeper client port |
 
 ## Getting Started
 
@@ -37,7 +47,7 @@ HAProxy (8123 / 9000)
 docker compose up -d
 ```
 
-**Check all services are healthy:**
+**Check all services are running:**
 ```bash
 docker compose ps
 ```
@@ -51,43 +61,33 @@ curl http://localhost:8123/ping
 ## Configuration
 
 ```
-config/
-├── keeper/
-│   └── keeper_config.xml          # Keeper server, Raft, and storage settings
-├── haproxy/
-│   └── haproxy.cfg                # Load balancer frontends/backends
-├── node1/
-│   ├── config.d/
-│   │   └── cluster.xml            # Cluster topology, Keeper address, macros (replica=node1)
-│   └── users.d/
-│       └── default-user.xml       # Removes default user, creates admin user
-└── node2/
-    ├── config.d/
-    │   └── cluster.xml            # Same topology, different macro (replica=node2)
-    └── users.d/
-        └── default-user.xml       # Same user config as node1
+config.d/
+├── cluster.xml       # Cluster topology and ZooKeeper address (shared by all nodes)
+├── macros_1.xml      # Shard/replica macros for clickhouse-01
+├── macros_2.xml      # Shard/replica macros for clickhouse-02
+└── macros_3.xml      # Shard/replica macros for clickhouse-03
+
+haproxy/
+└── haproxy.cfg       # Load balancer frontends/backends
 ```
 
 ### Cluster
 
-Both nodes belong to cluster `my_cluster` with a single shard and two replicas. `internal_replication=true` means inserts go to one replica and ClickHouse replicates to the other automatically via Keeper.
+All three nodes belong to cluster `my_cluster` with a single shard and three replicas. `internal_replication=true` means inserts go to one replica and ClickHouse replicates to the others via ZooKeeper automatically.
 
-Each node has a unique `{replica}` macro (`node1` / `node2`) and a shared `{shard}` macro (`1`), used when creating replicated tables.
+Each node has a unique `{replica}` macro and a shared `{shard}` macro (`1`), resolved at table creation time.
 
-### Keeper
+### ZooKeeper
 
-Single-node Keeper instance for coordination. For production, run at least 3 Keeper nodes for fault tolerance.
+Single-node ZooKeeper instance for coordination. For production, run a 3-node ZooKeeper ensemble for fault tolerance.
 
 | Setting | Value |
 |---------|-------|
-| Client port | `9181` |
-| Raft port | `9234` |
-| Operation timeout | `10,000 ms` |
-| Session timeout | `30,000 ms` |
+| Client port | `2181` |
 
 ## Credentials
 
-Configured in `.env` and applied via `users.d/default-user.xml` on both nodes. The `default` user is removed and replaced with `admin`.
+Set in `.env`:
 
 ```env
 CLICKHOUSE_USER=admin
@@ -127,19 +127,29 @@ ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/events', '{replica}')
 ORDER BY (ts, id);
 ```
 
-The `{shard}` and `{replica}` macros are substituted per-node from `cluster.xml`.
+The `{shard}` and `{replica}` macros are substituted per-node from each node's `macros_*.xml`.
 
-## Volumes
+## Tests
 
-| Volume | Contents |
-|--------|---------|
-| `keeper_data` | Keeper coordination log and snapshots |
-| `ch_node1_data` | Node 1 table data |
-| `ch_node2_data` | Node 2 table data |
+Install dependencies:
+
+```bash
+pip install -r test/requirements.txt
+```
+
+| Script | Description |
+|--------|-------------|
+| `test/01-test.py` | Prints cluster info, shard layout, and verifies HAProxy routes across all nodes |
+| `test/02-test-create-and-query,py` | Creates `orders` table on cluster, inserts 100 rows of mock data, queries per-node counts and sales summary |
+
+```bash
+python test/01-test.py
+python "test/02-test-create-and-query,py"
+```
 
 ## Stopping
 
 ```bash
-docker compose down        # keep volumes
-docker compose down -v     # remove volumes (destroys all data)
+docker compose down        # keep data
+docker compose down -v     # remove all volumes (destroys data)
 ```

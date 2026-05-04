@@ -1,6 +1,6 @@
 services:
   gitlab:
-    image: 'gitlab/gitlab-ce:17.4.1-ce.0'
+    image: 'gitlab/gitlab-ce:18.11.1-ce.0'
     container_name: gitlab
     restart: always
     hostname: 'localhost'
@@ -14,3 +14,4 @@ services:
         - './config:/etc/gitlab'
         - './logs:/var/log/gitlab'
         - './data:/var/opt/gitlab'
+        - ./gitlab.rb:/etc/gitlab/gitlab.rb:ro

@@ -37,3 +37,79 @@ ENABLE_CORS = True
 HTTP_HEADERS = {
     "X-Frame-Options": "ALLOWALL"
 }
+
+import os
+import requests
+from flask_appbuilder.security.manager import AUTH_OID, AUTH_REMOTE_USER, AUTH_DB, AUTH_LDAP, AUTH_OAUTH
+from superset.security import SupersetSecurityManager
+
+ENABLE_PROXY_FIX = True
+AUTH_TYPE = AUTH_OAUTH
+BASE_URL = os.environ.get('DSM_OAUTH_INTERNAL_ADDRESS') or os.environ.get('DSM_OAUTH_DOMAIN')
+
+OAUTH_PROVIDERS = [
+    {
+        'name': 'moma',
+        'icon': '',
+        'token_key': 'access_token',
+        'remote_app': {
+            'client_id': os.environ.get('DSM_OAUTH_CLIENT_ID', None),
+            'client_secret': os.environ.get('DSM_OAUTH_CLIENT_SECRET', None),
+            'client_kwargs': {
+                'scope': 'read'
+            },
+            'authorize_url': f"{os.environ.get('DSM_OAUTH_DOMAIN',None)}/o/authorize",
+            'access_token_url': f"{BASE_URL}/o/token/",
+        }
+    }
+]
+
+# --- Security & Role Configurations ---
+AUTH_USER_REGISTRATION = True
+# Recommendation: Set default registration role to the lowest privilege (Gamma) instead of Admin
+AUTH_USER_REGISTRATION_ROLE = "Gamma" 
+
+# Map the custom keys returned by oauth_user_info to actual Superset roles
+AUTH_ROLES_MAPPING = {
+    "provider_admin": ["Admin"],
+    "provider_user": ["Gamma"], # Gamma is standard read-only. Use "Alpha" if they need to create charts/dashboards.
+}
+
+# Force Superset to update the user's role on every login (in case their superuser status changes)
+AUTH_ROLES_SYNC_AT_LOGIN = True
+
+SQLLAB_TIMEOUT = 60000
+AUTH_ROLE_PUBLIC = 'Public'
+WTF_CSRF_ENABLED = False
+PUBLIC_ROLE_LIKE = "Alpha"
+PUBLIC_ROLE_LIKE_Alpha = True
+HTTP_HEADERS = {}
+
+
+class CustomSsoSecurityManager(SupersetSecurityManager):
+    def oauth_user_info(self, provider, response=None):
+        BASE_URL = os.environ.get('DSM_OAUTH_INTERNAL_ADDRESS') or os.environ.get('DSM_OAUTH_DOMAIN')
+        
+        res = requests.get(f"{BASE_URL}/api/v1/account/me", 
+            headers={
+                'Authorization': f"Bearer {response['access_token']}"
+            }
+        )
+
+        me = res.json()
+        
+        # Determine the role key based on the 'is_superuser' flag
+        is_super = me.get('is_superuser', False)
+        role_keys = ['provider_admin'] if is_super else ['provider_user']
+
+        return {
+            'id': me.get('id'), 
+            'username': me.get('username'), 
+            'name': me.get('username'), 
+            'email': me.get('email'), 
+            'first_name': me.get('first_name'), 
+            'last_name': me.get('last_name'),
+            'role_keys': role_keys  # Pass the roles to Flask-AppBuilder
+        }
+
+CUSTOM_SECURITY_MANAGER = CustomSsoSecurityManager

@@ -1,0 +1,57 @@
+volumes:
+  open-webui: {}
+  db: {}
+  redis_db: {}
+  redisinsight_data: {}
+
+services:
+    db:
+        container_name: ${PROJECT_NAME}-db
+        image: postgres:18-alpine
+        volumes:
+            - db:/var/lib/postgresql/data
+        env_file:
+            - .env
+    redis:
+        container_name: ${PROJECT_NAME}-redis
+        image: redis:7.2-alpine
+        volumes:
+            - redis_db:/data
+    
+    redis-insight:
+        container_name: ${PROJECT_NAME}-redis-insight
+        image: redislabs/redisinsight:3.6
+        volumes:
+            - redisinsight_data:/data
+        env_file:
+            - .env
+        ports:
+            - 5540:5540
+        
+    open-webui-1:
+        container_name: ${PROJECT_NAME}-open-webui-1
+        image: ghcr.io/open-webui/open-webui:0.8.12
+        env_file:
+            - .env
+        depends_on:
+            - db
+    open-webui-2:
+        container_name: ${PROJECT_NAME}-open-webui-2
+        image: ghcr.io/open-webui/open-webui:0.8.12
+        env_file:
+            - .env
+        depends_on:
+            - db
+    
+    nginx:
+        image: nginx:1.25.2-alpine
+        container_name: ${PROJECT_NAME}-nginx
+        ports:
+            - 8080:8080
+        volumes:
+            - ./nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - open-webui-1
+            - open-webui-2
+        environment:
+            NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".conf"

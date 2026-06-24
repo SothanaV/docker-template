@@ -22,6 +22,12 @@ services:
       - clickhouse-01
       - clickhouse-02
       - clickhouse-03
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   clickhouse-01:
     image: clickhouse/clickhouse-server:25.8-alpine
@@ -37,6 +43,12 @@ services:
       - ./config.d/macros_1.xml:/etc/clickhouse-server/config.d/macros.xml
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   clickhouse-02:
     image: clickhouse/clickhouse-server:25.8-alpine
@@ -52,6 +64,12 @@ services:
       - ./config.d/macros_2.xml:/etc/clickhouse-server/config.d/macros.xml
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   clickhouse-03:
     image: clickhouse/clickhouse-server:25.8-alpine
@@ -67,3 +85,9 @@ services:
       - ./config.d/macros_3.xml:/etc/clickhouse-server/config.d/macros.xml
     depends_on:
       - zookeeper
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

@@ -11,6 +11,12 @@ services:
       - LANGFLOW_SECRET_KEY=your_super_secret_key_here
     volumes:
       - ./langflow-data:/app/langflow
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7860/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   postgres:
     image: postgres:18-alpine

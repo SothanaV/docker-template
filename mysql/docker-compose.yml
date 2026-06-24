@@ -11,3 +11,9 @@ services:
       - db:/var/lib/mysql
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-u", "root"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

@@ -20,3 +20,11 @@ async def echo(message: str) -> str:
     return message
 
 app = mcp.http_app(path='/mcp')
+
+
+@app.get("/healthz")
+async def healthz():
+    return {
+        "status": "healthy",
+        "service": "fastmcp"
+    }

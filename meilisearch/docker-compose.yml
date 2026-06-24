@@ -9,3 +9,9 @@ services:
       - 7700:7700
     environment:
       - MEILI_MASTER_KEY=qwer1234
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

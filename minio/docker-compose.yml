@@ -13,3 +13,9 @@ services:
             MINIO_ROOT_PASSWORD: minio123
         volumes:
             - data:/data
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+            interval: 15s
+            timeout: 10s
+            retries: 3
+            start_period: 30s

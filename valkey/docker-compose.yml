@@ -10,6 +10,12 @@ services:
       - .env
     ports:
       - 6379:6379
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
   redis-insight:
     container_name: redis-insight
     image: redislabs/redisinsight:2.66

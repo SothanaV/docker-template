@@ -17,3 +17,9 @@ services:
             - .env
         environment:
             NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".conf"
+        healthcheck:
+            test: ["CMD-SHELL", "nginx -t 2>&1 | grep -q 'succeeded'"]
+            interval: 30s
+            timeout: 5s
+            retries: 3
+            start_period: 10s

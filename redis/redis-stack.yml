@@ -10,6 +10,12 @@ services:
             - 6379:6379 
         env_file:
             - .env
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 10s
 
     redis-insight1:
         container_name: ${PROJECT_NAME}-redis-insight

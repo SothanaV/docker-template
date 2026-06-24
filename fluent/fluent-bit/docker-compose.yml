@@ -11,3 +11,9 @@ services:
           - 18000:18000
         volumes:
           - ./conf/:/etc/fluent-bit/:ro
+        healthcheck:
+          test: ["CMD-SHELL", "fluent-bit -t -c /fluent-bit/etc/fluent-bit.conf"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 20s

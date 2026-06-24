@@ -35,6 +35,12 @@ services:
             - .env
         depends_on:
             - db
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
     open-webui-2:
         container_name: ${PROJECT_NAME}-open-webui-2
         image: ghcr.io/open-webui/open-webui:0.8.12
@@ -42,6 +48,12 @@ services:
             - .env
         depends_on:
             - db
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
     
     nginx:
         image: nginx:1.25.2-alpine

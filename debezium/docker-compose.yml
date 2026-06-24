@@ -90,6 +90,12 @@ services:
             - debezium-postgres-offsets:/debezium/data
         env_file:
             - .env
+        healthcheck:
+          test: ["CMD-SHELL", "ps aux | grep -v grep | grep -c debezium"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
 
     debezium-server-oracle:
         container_name: ${PROJECT_NAME}-debezium-server-oracle
@@ -116,6 +122,12 @@ services:
             - debezium-oracle-offsets:/debezium/data
         env_file:
             - .env
+        healthcheck:
+          test: ["CMD-SHELL", "ps aux | grep -v grep | grep -c debezium"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
 
     debezium-server-mssql:
         container_name: ${PROJECT_NAME}-debezium-server-mssql
@@ -142,6 +154,12 @@ services:
             - debezium-mssql-offsets:/debezium/data
         env_file:
             - .env
+        healthcheck:
+          test: ["CMD-SHELL", "ps aux | grep -v grep | grep -c debezium"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
 
     minio:
         container_name: ${PROJECT_NAME}-${MINIO_CONTAINER_NAME}

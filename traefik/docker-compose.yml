@@ -23,4 +23,10 @@ services:
             - "traefik.port=8080"
             - "traefik.backend=traefik"
             - "traefik.frontend.entryPoints=http,https"
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+            interval: 15s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
 

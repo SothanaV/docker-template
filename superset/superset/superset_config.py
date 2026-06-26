@@ -4,7 +4,6 @@ SECRET_KEY = os.environ.get('SUPERSET_SECRET_KEY', 'SECRET')
 
 ROW_LIMIT = 5000
 SUPERSET_WORKERS = 4
-CSRF_ENABLED = True
 ENABLE_PROXY_FIX=True
 
 CACHE_CONFIG = {
@@ -23,14 +22,11 @@ DB_CONFIG = {
 }
 SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DB}'.format(**DB_CONFIG)
 
-SQLALCHEMY_TRACK_MODIFICATIONS = True
 SUPERSET_WEBSERVER_TIMEOUT = 60000
 
 ## Custom user info
 SQLLAB_TIMEOUT = 60000
-AUTH_ROLE_PUBLIC = 'Public'
 WTF_CSRF_ENABLED = False
-PUBLIC_ROLE_LIKE = "Gamma"
 
 TALISMAN_ENABLED = False
 ENABLE_CORS = True
@@ -78,12 +74,8 @@ AUTH_ROLES_MAPPING = {
 # Force Superset to update the user's role on every login (in case their superuser status changes)
 AUTH_ROLES_SYNC_AT_LOGIN = True
 
-SQLLAB_TIMEOUT = 60000
 AUTH_ROLE_PUBLIC = 'Public'
-WTF_CSRF_ENABLED = False
 PUBLIC_ROLE_LIKE = "Alpha"
-PUBLIC_ROLE_LIKE_Alpha = True
-HTTP_HEADERS = {}
 
 
 class CustomSsoSecurityManager(SupersetSecurityManager):

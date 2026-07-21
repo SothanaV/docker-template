@@ -2,7 +2,7 @@ python3 -m venv env
 source env/bin/activate
 pip install fastmcp "uvicorn[standard]"
 mkdir -p server
-echo "
+cat > server/server.py << 'EOF'
 from fastmcp import FastMCP
 
 mcp = FastMCP("MCP Server")
@@ -13,5 +13,5 @@ async def echo(message: str) -> str:
 
 app = mcp.http_app(path='/mcp')
 
-" > server/server.py
-pip freeze > sserver/requirements.txt
+EOF
+pip freeze > server/requirements.txt

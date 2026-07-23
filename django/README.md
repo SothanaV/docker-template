@@ -188,3 +188,23 @@ urlpatterns += [
    
 ]
 ```
+
+## config if use behide proxy
+```python
+IS_BEHIND_PROXY = os.environ.get('IS_BEHIND_PROXY', 'False').lower() == 'true'
+
+if IS_BEHIND_PROXY:
+    # The subpath the app is served under (xxx.yyy.com/system)
+    FORCE_SCRIPT_NAME = os.environ.get('FORCE_SCRIPT_NAME', '/system')
+    
+    # Static and Media must also respect the subpath prefix
+    STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
+    MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
+    
+    # Tell Django to trust the Ingress Controller headers
+    USE_X_FORWARDED_HOST = True
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    # Standard local development settings
+    FORCE_SCRIPT_NAME = None
+```

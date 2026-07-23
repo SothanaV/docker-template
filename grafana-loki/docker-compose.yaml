@@ -7,6 +7,12 @@ services:
         image: grafana/loki:3.3.2
         volumes:
             - loki_data:/loki
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:3100/ready"]
+            interval: 15s
+            timeout: 5s
+            retries: 3
+            start_period: 30s
 
     grafana:
         image: grafana/grafana:11.4.0
@@ -14,3 +20,9 @@ services:
           - grafana_data:/var/lib/grafana
         ports:
             - 3000:3000
+        healthcheck:
+            test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s

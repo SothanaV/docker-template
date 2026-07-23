@@ -8,3 +8,20 @@ services:
         - ./pipeline/pipelines:/app/pipelines
       env_file:
         - .env
+      healthcheck:
+        test: ["CMD-SHELL", "curl -f http://localhost:9099/healthz || exit 1"]
+        interval: 30s
+        timeout: 10s
+        retries: 3
+        start_period: 30s
+
+  pipeline-health:
+      build:
+        context: ./pipeline
+        dockerfile: Dockerfile.health
+      ports:
+        - "9098:9098"
+      environment:
+        - OPEN_WEBUI_HOST=${OPEN_WEBUI_HOST:-localhost}
+      env_file:
+        - .env

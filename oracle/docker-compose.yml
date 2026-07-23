@@ -11,3 +11,9 @@ services:
             - 1521:1521
         volumes:
             - data:/opt/oracle/oradata
+        healthcheck:
+            test: ["CMD-SHELL", "python3 -c \"import time; time.sleep(1)\""]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 120s

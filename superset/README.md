@@ -5,7 +5,7 @@ docker compose up
 ```
 
 ## Note
-- [docker images amancevice/superset:4.1.0](https://hub.docker.com/r/amancevice/superset/tags)
+- [docker images apache/superset:6.1.0](https://hub.docker.com/r/apache/superset/tags)
 
 ## How to public dashboard
 - Login as admin

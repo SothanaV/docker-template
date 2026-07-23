@@ -1,105 +1,79 @@
 # Airflow v3
-1. create image
 
-```
+A Docker Compose template for [Apache Airflow](https://airflow.apache.org/) 3.0 — a platform for authoring, scheduling, and monitoring data pipelines.
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
+
+## Quick Start
+
+1. Build the custom image:
+
+```bash
 docker build -t my-airflow .
 ```
 
-2. start airflow
+1. Start Airflow:
+
+```bash
+docker compose up -d
 ```
-docker compose up
-```
 
-3. open browser http://localhost:8080
-- username : admin
-- password : admin
+1. Open the UI at <http://localhost:8080>
+   - Username: `admin`
+   - Password: `admin`
 
-4. tigger dag
+1. Trigger a DAG from the UI.
 
-## Noti email
+## Services
 
-add variable
-- SITE_NAME [str] : Site name for email title
-- DSM_EMAIL_URI [str] : https://email-service.data.storemesh.com
-- DSM_EMAIL_APIKEY [str] : ApiKey for dsm email services
-- ALERT_EMAILS [array[str]] : Email for notice if pipeline error
+| Service                 | Image / Build           | Port | Description                   |
+|-------------------------|-------------------------|------|-------------------------------|
+| `postgres`              | `postgres:17.5-alpine`  | —    | Airflow metadata database     |
+| `airflow-apiserver`     | `my-airflow`            | 8080 | Web UI & API server           |
+| `airflow-scheduler`     | `my-airflow`            | —    | Schedules and queues DAG runs |
+| `airflow-dag-processor` | `my-airflow`            | —    | Processes DAG files           |
 
-install package
-```
+## Networks
+
+| Network    | Type     | Used By                   |
+|------------|----------|---------------------------|
+| `internal` | internal | All services (isolated)   |
+| `kedro`    | external | `airflow-scheduler` only  |
+
+## Email Notifications
+
+Add these Airflow variables in the UI (**Admin → Variables**):
+
+| Variable           | Type           | Description                            |
+|--------------------|----------------|----------------------------------------|
+| `SITE_NAME`        | string         | Site name used in email subject        |
+| `DSM_EMAIL_URI`    | string         | Email service base URL                 |
+| `DSM_EMAIL_APIKEY` | string         | API key for the email service          |
+| `ALERT_EMAILS`     | array[string]  | Recipients for pipeline failure alerts |
+
+Install the notification package in the custom image:
+
+```bash
 pip install dsm-services==0.0.13
 ```
 
-## SighIn with oauth
-- update `airflow-requirements.txt`
-```
-...
+## OAuth Sign-In
+
+To enable OAuth2 login, update `airflow-requirements.txt`:
+
+```text
 apache-airflow-providers-fab==2.4.2
 Authlib==1.6.4
 Flask-Limiter==3.12
-...
 ```
-- create `webserver_config.py` maping to api-server `/opt/airflow/webserver_config.py`
-```python
-from __future__ import annotations
 
-import os
-import requests
-from flask_appbuilder.security.manager import AUTH_OAUTH
-from airflow.providers.fab.auth_manager.security_manager.override import FabAirflowSecurityManagerOverride
+Mount `webserver_config.py` to `/opt/airflow/webserver_config.py` (already configured in `docker-compose.yml`). Update the `client_id` and `client_secret` in that file with your OAuth2 provider credentials.
 
-basedir = os.path.abspath(os.path.dirname(__file__))
+## Stop
 
-# Flask-WTF flag for CSRF
-WTF_CSRF_ENABLED = True
-
-AUTH_TYPE = AUTH_OAUTH
-OAUTH_PROVIDERS = [{
-    'name':'dsm',
-    'token_key':'access_token',
-    'icon':'fa-lock',
-        'remote_app': {
-            'api_base_url':'http://oauth.data.storemesh.com/api/v1/account/me/',
-            'access_token_url':'http://oauth.data.storemesh.com/o/token/',
-            'authorize_url':'https://oauth.data.storemesh.com/o/authorize',
-            'request_token_url': None,
-            'client_id': "",
-            'client_secret': "",
-        }
-}]
-
-
-class CustomSecurity(FabAirflowSecurityManagerOverride):
-    
-    def sync_roles(self):
-        # Custom logic or possibly skipping the sync altogether
-        pass
-
-    def get_oauth_user_info(self, provider, response=None):
-        if provider == "dsm":
-            config = {}
-            for elm in OAUTH_PROVIDERS:
-                if elm.get('name') == 'dsm':
-                    config = elm.get('remote_app')
-            res = requests.get(config.get('api_base_url'), headers={
-                'Authorization': f"{response.get('token_type')} {response.get('access_token')}"
-            })
-            if res.status_code!=200:
-                print(res.text)
-                return {}
-            me = res.json()
-            print(me)
-            parsed_token = {
-                "email": me["email"],
-                "first_name": me["first_name"],
-                "last_name": me["last_name"],
-                "username": me["username"],
-                "role_keys": ["Admin", "Viewer"],
-            }
-            return parsed_token
-        return {}
-
-SECURITY_MANAGER_CLASS = CustomSecurity
-AUTH_USER_REGISTRATION = True
-AUTH_ROLES_SYNC_AT_LOGIN = True
-AUTH_USER_REGISTRATION_ROLE = "Admin"
+```bash
+docker compose down
 ```

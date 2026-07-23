@@ -5,15 +5,27 @@ volumes:
 services:
     db:
         container_name: ${PROJECT_NAME}-db
-        image: postgres:16.3-alpine
+        image: postgres:18-alpine
         volumes:
-          - db:/var/lib/postgresql/data
+            - db:/var/lib/postgresql/data
         env_file:
             - .env
-
+    
+    qdrant:
+        image: qdrant/qdrant:latest
+        container_name: ${PROJECT_NAME}-qdrant
+        restart: unless-stopped
+        ports:
+            - 6333:6333 # REST API
+            - 6334:6334 # gRPC API
+        env_file:
+            - .env
+        volumes:
+            - qdrant_data:/qdrant/storage
+        
     open-webui:
         container_name: ${PROJECT_NAME}-open-webui
-        image: ghcr.io/open-webui/open-webui:0.6.0
+        image: ghcr.io/open-webui/open-webui:0.8.12
         env_file:
             - .env
         volumes:
@@ -22,3 +34,9 @@ services:
             - 8080:8080
         depends_on:
             - db
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s

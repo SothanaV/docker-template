@@ -1,0 +1,194 @@
+volumes:
+    redis_data: {}
+    minio_data: {}
+    debezium-postgres-offsets: {}
+    debezium-oracle-offsets: {}
+    debezium-mssql-offsets: {}
+
+services:
+    postgres:
+        container_name: ${PROJECT_NAME}-${POSTGRES_CONTAINER_NAME}
+        image: postgres:18.0-alpine
+        ports:
+            - "${POSTGRES_PORT}:5432"
+        environment:
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
+        command: ["postgres", "-c", "wal_level=logical"]
+        volumes:
+            - debezium-postgres-offsets:/var/lib/postgresql/data
+        env_file:
+            - .env
+
+    oracle:
+        container_name: ${PROJECT_NAME}-${ORACLE_CONTAINER_NAME}
+        image: gvenzl/oracle-free:23.8-full
+        ports:
+            - "${ORACLE_PORT}:1521"
+        environment:
+            - ORACLE_PASSWORD=${ORACLE_PASSWORD}
+            - APP_USER=${ORACLE_APP_USER}
+            - APP_USER_PASSWORD=${ORACLE_APP_PASSWORD}
+        volumes:
+            - ./oracle-init:/container-entrypoint-initdb.d
+        env_file:
+            - .env
+
+    mssql:
+        container_name: ${PROJECT_NAME}-${MSSQL_CONTAINER_NAME}
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+            - "${MSSQL_PORT}:1433"
+        environment:
+            SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+            ACCEPT_EULA: ${MSSQL_ACCEPT_EULA}
+            MSSQL_AGENT_ENABLED: ${MSSQL_AGENT_ENABLED}
+        volumes:
+            - debezium-mssql-offsets:/var/opt/mssql
+        env_file:
+            - .env
+
+    redis:
+        container_name: ${PROJECT_NAME}-${REDIS_CONTAINER_NAME}
+        image: redis:7.2-alpine
+        ports:
+            - "${REDIS_PORT}:6379"
+        volumes:
+            - redis_data:/data
+        env_file:
+            - .env
+
+    redis-insight:
+        container_name: ${PROJECT_NAME}-redis-insight
+        image: redislabs/redisinsight:2.66
+        ports:
+            - "${REDIS_INSIGHT_PORT}:5540"
+        env_file:
+            - .env
+
+    debezium-server:
+        container_name: ${PROJECT_NAME}-debezium-server
+        image: quay.io/debezium/server:2.4
+        depends_on:
+            - postgres
+            - redis
+        environment:
+            - DEBEZIUM_SINK_TYPE=redis
+            - DEBEZIUM_SINK_REDIS_ADDRESS=redis:${REDIS_PORT}
+            - DEBEZIUM_SOURCE_CONNECTOR_CLASS=io.debezium.connector.postgresql.PostgresConnector
+            - DEBEZIUM_SOURCE_DATABASE_HOSTNAME=postgres
+            - DEBEZIUM_SOURCE_DATABASE_PORT=5432
+            - DEBEZIUM_SOURCE_DATABASE_USER=${POSTGRES_USER}
+            - DEBEZIUM_SOURCE_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+            - DEBEZIUM_SOURCE_DATABASE_DBNAME=${POSTGRES_DB}
+            - DEBEZIUM_SOURCE_TOPIC_PREFIX=${DEBEZIUM_POSTGRES_TOPIC_PREFIX}
+            - DEBEZIUM_SOURCE_SCHEMA_INCLUDE_LIST=${DEBEZIUM_POSTGRES_SCHEMA_INCLUDE_LIST}
+            - DEBEZIUM_SOURCE_PLUGIN_NAME=pgoutput
+            - DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME=/debezium/data/offsets.dat
+        volumes:
+            - debezium-postgres-offsets:/debezium/data
+        env_file:
+            - .env
+        healthcheck:
+          test: ["CMD-SHELL", "ps aux | grep -v grep | grep -c debezium"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
+
+    debezium-server-oracle:
+        container_name: ${PROJECT_NAME}-debezium-server-oracle
+        image: quay.io/debezium/server:2.7
+        restart: on-failure
+        depends_on:
+            - oracle
+            - redis
+        environment:
+            - DEBEZIUM_SINK_TYPE=redis
+            - DEBEZIUM_SINK_REDIS_ADDRESS=redis:${REDIS_PORT}
+            - DEBEZIUM_SOURCE_CONNECTOR_CLASS=io.debezium.connector.oracle.OracleConnector
+            - DEBEZIUM_SOURCE_DATABASE_HOSTNAME=oracle
+            - DEBEZIUM_SOURCE_DATABASE_PORT=1521
+            - DEBEZIUM_SOURCE_DATABASE_USER=${DEBEZIUM_ORACLE_USER}
+            - DEBEZIUM_SOURCE_DATABASE_PASSWORD=${DEBEZIUM_ORACLE_PASSWORD}
+            - DEBEZIUM_SOURCE_DATABASE_DBNAME=FREE
+            - DEBEZIUM_SOURCE_TOPIC_PREFIX=${DEBEZIUM_ORACLE_TOPIC_PREFIX}
+            - DEBEZIUM_SOURCE_SCHEMA_INCLUDE_LIST=${DEBEZIUM_ORACLE_SCHEMA_INCLUDE_LIST}
+            - DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME=/debezium/data/offsets.dat
+            - DEBEZIUM_SOURCE_SCHEMA_HISTORY_INTERNAL=io.debezium.storage.redis.history.RedisSchemaHistory
+            - DEBEZIUM_SOURCE_SCHEMA_HISTORY_INTERNAL_REDIS_ADDRESS=redis:${REDIS_PORT}
+        volumes:
+            - debezium-oracle-offsets:/debezium/data
+        env_file:
+            - .env
+        healthcheck:
+          test: ["CMD-SHELL", "ps aux | grep -v grep | grep -c debezium"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
+
+    debezium-server-mssql:
+        container_name: ${PROJECT_NAME}-debezium-server-mssql
+        image: quay.io/debezium/server:2.7
+        restart: on-failure
+        depends_on:
+            - mssql
+            - redis
+        environment:
+            - DEBEZIUM_SINK_TYPE=redis
+            - DEBEZIUM_SINK_REDIS_ADDRESS=redis:${REDIS_PORT}
+            - DEBEZIUM_SOURCE_CONNECTOR_CLASS=io.debezium.connector.sqlserver.SqlServerConnector
+            - DEBEZIUM_SOURCE_DATABASE_HOSTNAME=mssql
+            - DEBEZIUM_SOURCE_DATABASE_PORT=1433
+            - DEBEZIUM_SOURCE_DATABASE_USER=${MSSQL_SA_USER}
+            - DEBEZIUM_SOURCE_DATABASE_PASSWORD=${MSSQL_SA_PASSWORD}
+            - DEBEZIUM_SOURCE_DATABASE_NAMES=${MSSQL_DB}
+            - DEBEZIUM_SOURCE_TOPIC_PREFIX=${DEBEZIUM_MSSQL_TOPIC_PREFIX}
+            - DEBEZIUM_SOURCE_DATABASE_ENCRYPT=${MSSQL_ENCRYPT}
+            - DEBEZIUM_SOURCE_OFFSET_STORAGE_FILE_FILENAME=/debezium/data/offsets.dat
+            - DEBEZIUM_SOURCE_SCHEMA_HISTORY_INTERNAL=io.debezium.storage.redis.history.RedisSchemaHistory
+            - DEBEZIUM_SOURCE_SCHEMA_HISTORY_INTERNAL_REDIS_ADDRESS=redis:${REDIS_PORT}
+        volumes:
+            - debezium-mssql-offsets:/debezium/data
+        env_file:
+            - .env
+        healthcheck:
+          test: ["CMD-SHELL", "ps aux | grep -v grep | grep -c debezium"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s
+
+    minio:
+        container_name: ${PROJECT_NAME}-${MINIO_CONTAINER_NAME}
+        image: quay.io/minio/minio:RELEASE.2025-07-23T15-54-02Z
+        ports:
+            - "${MINIO_API_PORT}:9000"
+            - "${MINIO_CONSOLE_PORT}:9001"
+        environment:
+            - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+            - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+        command: server /data --console-address ":9001"
+        volumes:
+            - minio_data:/data
+        env_file:
+            - .env
+
+    python-consumer:
+        build:
+            context: ./python-consumer
+        container_name: ${PROJECT_NAME}-python-consumer
+        depends_on:
+            - redis
+            - minio
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=${REDIS_PORT}
+            - MINIO_ENDPOINT=minio:9000
+            - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+            - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+            - STREAM_KEY=${PYTHON_CONSUMER_STREAM_KEY}
+        env_file:
+            - .env

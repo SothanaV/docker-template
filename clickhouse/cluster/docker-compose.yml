@@ -1,0 +1,93 @@
+services:
+  zookeeper:
+    image: zookeeper:3.8
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+
+  haproxy:
+    image: haproxy:2.8
+    container_name: haproxy
+    ports:
+      - "8123:8123" # HTTP Entry Point
+      - "9000:9000" # Native Entry Point
+      - "8404:8404" # Stats Dashboard
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - clickhouse-01
+      - clickhouse-02
+      - clickhouse-03
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  clickhouse-01:
+    image: clickhouse/clickhouse-server:25.8-alpine
+    container_name: clickhouse-01
+    hostname: clickhouse-01
+    env_file:
+      - .env
+    ports:
+      - "18123:8123" # Direct access for debugging
+      - "19000:9000" 
+    volumes:
+      - ./config.d/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config.d/macros_1.xml:/etc/clickhouse-server/config.d/macros.xml
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  clickhouse-02:
+    image: clickhouse/clickhouse-server:25.8-alpine
+    container_name: clickhouse-02
+    hostname: clickhouse-02
+    env_file:
+      - .env
+    ports:
+      - "18124:8123" 
+      - "19001:9000" 
+    volumes:
+      - ./config.d/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config.d/macros_2.xml:/etc/clickhouse-server/config.d/macros.xml
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  clickhouse-03:
+    image: clickhouse/clickhouse-server:25.8-alpine
+    container_name: clickhouse-03
+    hostname: clickhouse-03
+    env_file:
+      - .env
+    ports:
+      - "18125:8123"
+      - "19002:9000"
+    volumes:
+      - ./config.d/cluster.xml:/etc/clickhouse-server/config.d/cluster.xml
+      - ./config.d/macros_3.xml:/etc/clickhouse-server/config.d/macros.xml
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

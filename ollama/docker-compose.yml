@@ -9,6 +9,12 @@ services:
         environment:
             - OLLAMA_KEEP_ALIVE=-1
             - OLLAMA_NUM_PARALLEL=16
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+          interval: 15s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
     ollama-2:
         container_name: ollama-2
         # image: ollama/ollama:0.5.12
@@ -20,6 +26,12 @@ services:
             - OLLAMA_KEEP_ALIVE=-1
             - OLLAMA_NUM_PARALLEL=16
             - CUDA_VISIBLE_DEVICES=1
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+          interval: 15s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
     ollama-3:
         container_name: ollama-3
         # image: ollama/ollama:0.5.12
@@ -31,6 +43,12 @@ services:
             - OLLAMA_KEEP_ALIVE=-1
             - OLLAMA_NUM_PARALLEL=16
             - CUDA_VISIBLE_DEVICES=2
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+          interval: 15s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
     ollama-4:
         container_name: ollama-4
         # image: ollama/ollama:0.5.12
@@ -42,6 +60,12 @@ services:
             - OLLAMA_KEEP_ALIVE=-1
             - OLLAMA_NUM_PARALLEL=16
             - CUDA_VISIBLE_DEVICES=3
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+          interval: 15s
+          timeout: 5s
+          retries: 3
+          start_period: 30s
             
     nginx:
         container_name: nginx
@@ -71,3 +95,9 @@ services:
             - 11435:11435
         volumes:
           - ./balancer:/balancer
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:11435/healthz"]
+          interval: 15s
+          timeout: 5s
+          retries: 3
+          start_period: 30s

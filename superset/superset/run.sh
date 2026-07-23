@@ -1,6 +1,4 @@
 
-echo "======= db init ======="
-superset db init
 echo "======= db upgrade ======="
 superset db upgrade
 echo "======= create admin ======="

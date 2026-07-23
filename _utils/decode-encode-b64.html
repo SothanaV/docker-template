@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base64 Encode / Decode</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #7dd3fc;
+      margin-bottom: 2rem;
+      letter-spacing: 0.05em;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .card {
+      background: #1e2030;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      height: 110px;
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      color: #e2e8f0;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 0.88rem;
+      padding: 0.75rem 1rem;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus { border-color: #7dd3fc; }
+
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.55rem 1.2rem;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    button:active { transform: scale(0.97); }
+    button:hover { opacity: 0.88; }
+
+    .btn-encode  { background: #3b82f6; color: #fff; }
+    .btn-decode  { background: #10b981; color: #fff; }
+    .btn-swap    { background: #8b5cf6; color: #fff; }
+    .btn-copy    { background: #475569; color: #e2e8f0; }
+    .btn-clear-field { background: #ef4444; color: #fff; }
+    .btn-danger  { background: #ef4444; color: #fff; }
+
+    .error { color: #f87171; font-size: 0.8rem; margin-top: 0.4rem; min-height: 1.1em; }
+
+    /* History */
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .history-header h2 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #7dd3fc;
+      letter-spacing: 0.05em;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .history-list::-webkit-scrollbar { width: 6px; }
+    .history-list::-webkit-scrollbar-track { background: transparent; }
+    .history-list::-webkit-scrollbar-thumb { background: #2d3148; border-radius: 4px; }
+
+    .history-item {
+      background: #0f1117;
+      border: 1px solid #2d3148;
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.5rem 1rem;
+      align-items: start;
+    }
+
+    .history-item .meta {
+      font-size: 0.72rem;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+
+    .history-item .badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-right: 0.4rem;
+      text-transform: uppercase;
+    }
+
+    .badge-encode { background: #1d4ed8; color: #bfdbfe; }
+    .badge-decode { background: #065f46; color: #a7f3d0; }
+
+    .history-item .text-val {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      word-break: break-all;
+    }
+
+    .history-item .text-val span { color: #94a3b8; }
+
+    .history-item .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .history-item button {
+      font-size: 0.72rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .btn-restore { background: #334155; color: #e2e8f0; }
+    .btn-del     { background: #7f1d1d; color: #fca5a5; }
+
+    .empty-state {
+      text-align: center;
+      color: #475569;
+      font-size: 0.85rem;
+      padding: 1.5rem 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Base64 Encode / Decode</h1>
+
+<div class="container">
+
+  <!-- Input -->
+  <div class="card">
+    <label for="inputText">Input</label>
+    <textarea id="inputText" placeholder="Paste plain text or Base64 here…"></textarea>
+    <div class="btn-row">
+      <button class="btn-encode" onclick="doEncode()">Encode →</button>
+      <button class="btn-decode" onclick="doDecode()">← Decode</button>
+      <button class="btn-swap"   onclick="swapFields()">⇅ Swap</button>
+      <button class="btn-clear-field" onclick="clearFields()">Clear</button>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="card">
+    <label for="outputText">Output</label>
+    <textarea id="outputText" readonly placeholder="Result appears here…"></textarea>
+    <div id="errorMsg" class="error"></div>
+    <div class="btn-row">
+      <button class="btn-copy" onclick="copyOutput()">Copy Output</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="card">
+    <div class="history-header">
+      <h2>History</h2>
+      <button class="btn-danger" onclick="clearHistory()">Clear History</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'b64_history';
+  const MAX_HISTORY = 50;
+
+  const inputEl  = document.getElementById('inputText');
+  const outputEl = document.getElementById('outputText');
+  const errorEl  = document.getElementById('errorMsg');
+  const listEl   = document.getElementById('historyList');
+
+  /* ── helpers ── */
+  function setError(msg) { errorEl.textContent = msg; }
+  function clearError()  { errorEl.textContent = ''; }
+
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveHistory(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items.slice(0, MAX_HISTORY)));
+  }
+
+  function pushHistory(type, input, output) {
+    const items = loadHistory();
+    items.unshift({
+      id: Date.now(),
+      type,
+      input,
+      output,
+      ts: new Date().toLocaleString()
+    });
+    saveHistory(items);
+    renderHistory();
+  }
+
+  function truncate(str, n = 80) {
+    return str.length > n ? str.slice(0, n) + '…' : str;
+  }
+
+  function renderHistory() {
+    const items = loadHistory();
+    if (!items.length) {
+      listEl.innerHTML = '<div class="empty-state">No history yet.</div>';
+      return;
+    }
+    listEl.innerHTML = items.map(item => `
+      <div class="history-item" id="hi-${item.id}">
+        <div>
+          <div class="meta">
+            <span class="badge badge-${item.type}">${item.type}</span>
+            ${item.ts}
+          </div>
+          <div class="text-val">
+            <span>In: </span>${truncate(item.input)}<br/>
+            <span>Out:</span> ${truncate(item.output)}
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn-restore" onclick="restoreItem(${item.id})">Restore</button>
+          <button class="btn-del"     onclick="deleteItem(${item.id})">Delete</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  /* ── actions ── */
+  function doEncode() {
+    clearError();
+    const raw = inputEl.value;
+    if (!raw.trim()) return;
+    try {
+      const encoded = btoa(unescape(encodeURIComponent(raw)));
+      outputEl.value = encoded;
+      pushHistory('encode', raw, encoded);
+    } catch (e) {
+      setError('Encode failed: ' + e.message);
+    }
+  }
+
+  function doDecode() {
+    clearError();
+    const raw = inputEl.value.trim();
+    if (!raw) return;
+    try {
+      const decoded = decodeURIComponent(escape(atob(raw)));
+      outputEl.value = decoded;
+      pushHistory('decode', raw, decoded);
+    } catch {
+      setError('Invalid Base64 input — cannot decode.');
+    }
+  }
+
+  function swapFields() {
+    const tmp = inputEl.value;
+    inputEl.value  = outputEl.value;
+    outputEl.value = tmp;
+    clearError();
+  }
+
+  function clearFields() {
+    inputEl.value  = '';
+    outputEl.value = '';
+    clearError();
+  }
+
+  function copyOutput() {
+    if (!outputEl.value) return;
+    navigator.clipboard.writeText(outputEl.value).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = orig, 1500);
+    });
+  }
+
+  function restoreItem(id) {
+    const item = loadHistory().find(i => i.id === id);
+    if (!item) return;
+    inputEl.value  = item.input;
+    outputEl.value = item.output;
+    clearError();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function deleteItem(id) {
+    const items = loadHistory().filter(i => i.id !== id);
+    saveHistory(items);
+    renderHistory();
+  }
+
+  function clearHistory() {
+    if (!confirm('Clear all history?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    renderHistory();
+  }
+
+  /* ── init ── */
+  renderHistory();
+</script>
+</body>
+</html>

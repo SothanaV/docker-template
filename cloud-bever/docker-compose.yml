@@ -12,4 +12,10 @@ services:
         ports:
             - 8978:8978
         volumes: 
-            - cloudbeaver:/opt/cloudbeaver/workspace            
+            - cloudbeaver:/opt/cloudbeaver/workspace
+        healthcheck:
+          test: ["CMD-SHELL", "curl -f http://localhost:8978/api/v1/system/status || exit 1"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 60s

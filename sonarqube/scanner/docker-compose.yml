@@ -4,7 +4,7 @@ networks:
 
 services:
   scanner:
-    image: sonarsource/sonar-scanner-cli:10.0
+    image: sonarsource/sonar-scanner-cli:12.1
     networks: 
       - sonar
     volumes:

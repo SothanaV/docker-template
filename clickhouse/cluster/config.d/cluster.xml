@@ -1,6 +1,6 @@
 <clickhouse>
     <remote_servers>
-        <my_cluster>
+        <default>
             <shard>
                 <internal_replication>true</internal_replication>
                 <replica>
@@ -16,7 +16,7 @@
                     <port>9000</port>
                 </replica>
             </shard>
-        </my_cluster>
+        </default>
     </remote_servers>
 
     <zookeeper>

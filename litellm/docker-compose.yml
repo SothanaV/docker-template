@@ -1,0 +1,39 @@
+services:
+    postgres:
+        container_name: ${PROJECT_NAME}-db
+        image: postgres:18-alpine
+        restart: unless-stopped
+        ports:
+            - "${POSTGRES_PORT:-5432}:5432"
+        volumes:
+            - db_data:/var/lib/postgresql/data
+            - ./init-multiple-databases.sh:/docker-entrypoint-initdb.d/init-multiple-databases.sh
+        env_file:
+            - .env
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    litellm:
+        image: ghcr.io/berriai/litellm:stable
+        container_name: ${PROJECT_NAME}-litellm
+        restart: unless-stopped
+        ports:
+            - "${LITELLM_PORT:-4000}:4000"
+        volumes:
+            - ./config.yaml:/app/config.yaml
+        depends_on:
+            postgres:
+                condition: service_healthy
+        command: [ "--config", "/app/config.yaml", "--port", "4000", "--detailed_debug"]
+        env_file:
+            - .env
+        environment:
+            - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${PROJECT_NAME}-db:${POSTGRES_PORT:-5432}/litellm
+
+volumes:
+    db_data:
+    ollama_data:
+    webui_data:

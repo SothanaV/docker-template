@@ -1,6 +1,7 @@
 volumes:
   open-webui: {}
   db: {}
+  qdrant_data: {}
 
 services:
     db:

@@ -1,0 +1,13 @@
+[project]
+name = "server"
+version = "0.1.0"
+description = "FastMCP server template"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "fastmcp>=2.13,<3",
+    "uvicorn[standard]>=0.34,<1",
+]
+
+[tool.uv]
+package = false

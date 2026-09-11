@@ -1,31 +1,39 @@
 volumes:
-    media: {}
-    static: {}
     db: {}
 
-services: 
+services:
     db:
         container_name: ${PROJECT_NAME}-db
-        image: postgres:18.0-alpine
+        image: postgres:18-alpine
         volumes:
             - db:/var/lib/postgresql/data
         env_file:
             - .env
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+
     backend:
         container_name: ${PROJECT_NAME}-backend
         build: ./backend
-        command: sh runserver-dev.sh
-        volumes: 
+        command: >
+            sh -c "python manage.py migrate --noinput &&
+                   python manage.py runserver 0.0.0.0:8000"
+        volumes:
             - ./backend:/backend
-            - media:/var/www/media/
-            - static:/var/www/static/
-        ports: 
+        ports:
             - 8000:8000
-        env_file: 
+        env_file:
             - .env
+        depends_on:
+            db:
+                condition: service_healthy
         healthcheck:
-          test: ["CMD-SHELL", "curl -f http://localhost:8000/healthz/ || exit 1"]
-          interval: 30s
-          timeout: 10s
-          retries: 3
-          start_period: 60s
+            test: ["CMD", "python", "-c", "import urllib.request,sys; r=urllib.request.urlopen('http://localhost:8000/healthz/'); sys.exit(0 if r.status==200 else 1)"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 30s

@@ -1,17 +1,17 @@
-services: 
+services:
     backend:
         container_name: ${PROJECT_NAME}-backend
         build: ./backend
-        command: sh run-server-dev.sh
-        volumes: 
+        command: uvicorn --reload --host 0.0.0.0 --port 5000 server:app
+        volumes:
             - ./backend:/backend
-        ports: 
+        ports:
             - 5050:5000
-        env_file: 
+        env_file:
             - .env
         healthcheck:
-          test: ["CMD", "curl", "-f", "http://localhost:5000/healthz"]
-          interval: 30s
-          timeout: 10s
-          retries: 3
-          start_period: 40s
+            test: ["CMD", "python", "-c", "import urllib.request,sys; r=urllib.request.urlopen('http://localhost:5000/healthz'); sys.exit(0 if r.status==200 else 1)"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 20s

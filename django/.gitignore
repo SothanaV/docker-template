@@ -1,5 +1,6 @@
 # python
 env/
+.venv/
 *.pyc
 **__pycache__/
 
@@ -14,3 +15,4 @@ env/
 # django
 *.sqlite3
 .env
+uv.lock

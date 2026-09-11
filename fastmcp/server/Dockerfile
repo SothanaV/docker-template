@@ -1,9 +1,17 @@
 FROM python:3.14-slim
-RUN apt-get update --fix-missing
 
-RUN apt install -y git netcat-traditional curl iputils-ping
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UV_PROJECT_ENVIRONMENT=/venv \
+    PATH="/venv/bin:$PATH"
+
 WORKDIR /backend
-ADD ./requirements.txt requirements.txt
-RUN pip install -r requirements.txt
-ADD . /backend/
-WORKDIR /backend
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+COPY pyproject.toml ./
+RUN uv sync
+
+COPY . .
+
+CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "server:app"]

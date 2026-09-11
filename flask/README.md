@@ -1,61 +1,48 @@
 # Flask
 
-A Docker Compose template for developing and deploying a Flask backend service.
+Minimal Docker Compose template for a Flask backend (uv-managed, lock-free).
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0+)
+- [Docker](https://docs.docker.com/get-docker/) + Docker Compose v2
+- [uv](https://docs.astral.sh/uv/) (only for local, non-Docker work)
 
 ## Project Structure
 
 ```
 flask/
-├── backend/             # Flask application source
-├── docker-compose.yml   # Development configuration (port 5050)
-├── staging.yml          # Staging configuration (port 5000)
-├── start-flask.sh       # Helper start script
-└── .env                 # Environment variables
+├── backend/
+│   ├── Dockerfile        # python:3.14-slim + uv sync
+│   ├── pyproject.toml    # project metadata + dependencies
+│   └── server.py
+├── docker-compose.yml    # dev on port 5050
+└── .env
 ```
 
 ## Quick Start
-
-### Development
 
 ```bash
 docker compose up --build
 ```
 
-Access: http://localhost:5050
+- App: http://localhost:5050
+- Health: http://localhost:5050/healthz
 
-### Staging
+Stop: `docker compose down`
+
+## Dependencies
+
+Dependencies live in `backend/pyproject.toml` under `[project].dependencies`.
 
 ```bash
-docker compose -f staging.yml up --build
+uv lock                        # optional: pin locally (uv.lock is gitignored)
+uv run gunicorn server:app     # run locally without Docker
 ```
 
-Access: http://localhost:5000
+Inside Docker, `uv sync` installs from `pyproject.toml` directly (no lockfile required).
 
-## Services
-
-| Service   | Build      | Dev Port | Staging Port | Command                  |
-|-----------|------------|----------|--------------|--------------------------|
-| `backend` | `./backend`| 5050     | 5000         | `sh run-server-dev.sh`   |
-
-The `./backend` directory is mounted into the container for hot reload during development.
-
-## Environment Variables
-
-Create a `.env` file in the project root:
+## Environment
 
 ```env
 PROJECT_NAME=myapp
-```
-
-Add any additional Flask-specific variables your application needs.
-
-## Stop
-
-```bash
-docker compose down
 ```

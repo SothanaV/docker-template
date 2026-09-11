@@ -1,210 +1,104 @@
-# Django docker Template
-## Start Django New version
-- create django project
+# Django
+
+Minimal Docker Compose template for a Django + DRF backend (uv-managed, lock-free).
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) + Docker Compose v2
+- [uv](https://docs.astral.sh/uv/) (only for local, non-Docker work)
+
+## Project Structure
+
+```
+django/
+├── backend/
+│   ├── backend/          # settings, urls, wsgi/asgi, health check
+│   ├── Dockerfile        # python:3.14-slim + uv sync
+│   ├── manage.py
+│   └── pyproject.toml    # project metadata + dependencies (no requirements.txt)
+├── docker-compose.yml    # postgres + backend (dev, port 8000)
+└── .env
+```
+
+## Quick Start
+
 ```bash
-    sh start-django.sh
-```
-- create docker component
-    - <a href="docker-compose.yml"> docker-compose.yml </a>
-    - <a href="backend/Dockerfile"> Dockerfile </a>
-    - <a href="backend/runserver.sh"> runserver.sh </a>
-    - <a href=".env"> .env </a>
-
-- edit django project settings
-
-```python
-import os
-...
-
-SECRET_KEY = os.environ.get('DJANGO_SECRET')
-
-DEBUG = os.environ.get('STATE', None) == "dev"
-
-INSTALLED_APPS = [
-    ...
-    'corsheaders',
-    'rest_framework',
-    ...
-]
-
-MIDDLEWARE = [
-    ...
-    'corsheaders.middleware.CorsMiddleware'
-]
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DB', None),
-        'USER': os.environ.get('POSTGRES_USER', None),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', None),
-        'HOST': os.environ.get('POSTGRES_HOST', None),
-        'PORT': os.environ.get('POSTGRES_PORT', None),
-    }
-}
-
-CORS_ALLOW_ALL_ORIGINS = True
-
-CSRF_TRUSTED_ORIGINS = [
-    os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000')
-]
-
-SESSION_COOKIE_NAME = os.environ.get('PROJECT_NAME', "django")
+docker compose up --build
 ```
 
-if use server-side render(ssr)
-- edit in ```settings.py```
-```python
-STATIC_URL = '/static/'
-STATIC_ROOT = '/var/www/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/media/'
-```
-- edit in ```urls.py```
-```python
-from django.conf import settings
-from django.conf.urls.static import static
+- App: http://localhost:8000
+- Health: http://localhost:8000/healthz/
+- Admin: http://localhost:8000/admin
 
-urlpatterns+=static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+Migrations run automatically on start. Exec into the container for other commands:
+
+```bash
+docker compose exec backend python manage.py startapp myapp
+docker compose exec backend python manage.py createsuperuser
 ```
 
-- optional securities `settings.py`
-```python
-SESSION_COOKIE_AGE=60*60*24 # sec
-SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+## Dependencies
+
+Dependencies live in `backend/pyproject.toml` under `[project].dependencies`.
+
+```bash
+uv lock                        # optional: pin locally (uv.lock is gitignored)
+uv run python manage.py ...    # run locally without Docker
 ```
 
-- setttings restframework
-```python
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ],
-}
-
-from datetime import timedelta
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'ROTATE_REFRESH_TOKENS': False,
-    'BLACKLIST_AFTER_ROTATION': True,
-
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
-    'VERIFYING_KEY': None,
-    'AUDIENCE': None,
-    'ISSUER': None,
-
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'USER_ID_FIELD': 'id',
-    'USER_ID_CLAIM': 'user_id',
-
-    'UPDATE_LAST_LOGIN':True
-}
-```
-## Architech Backend
-
-```
-.
-├── Dockerfile
-├── backend
-│   ├── __init__.py
-│   ├── asgi.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── manage.py
-├── requirements.txt
-└── runserver.sh
-```
+Inside Docker, `uv sync` installs from `pyproject.toml` directly (no lockfile required).
 
 ## Environment ```.env```
 
 ```bash
 PROJECT_NAME=<projectname>
-STATE=<dev/production>
+STATE=dev                     # "dev" enables DEBUG
 
-DJANGO_SECRET=<DJANGO SECRETKEY>
+DJANGO_SECRET=<secret key>
 DJANGO_ALLOW_ASYNC_UNSAFE=true
 PYTHONUNBUFFERED=1
 
-POSTGRES_DB=<DB NAME>
-POSTGRES_USER=<DB USER>
-POSTGRES_PASSWORD=<DB PASSWORD>
-DB_HOST=${PROJECT_NAME}-db
-DB_PORT=5432
+POSTGRES_DB=<db name>
+POSTGRES_USER=<db user>
+POSTGRES_PASSWORD=<db password>
+POSTGRES_HOST=${PROJECT_NAME}-db
+POSTGRES_PORT=5432
+PGDATA=/var/lib/postgresql/data
 
-NODE_ENV=development
-CI=true
-
-CSRF_TRUSTED_ORIGINS='<DOMAIN eg https://system.data.storemesh.com>'
+CSRF_TRUSTED_ORIGINS='http://localhost:8000'
 ```
 
-# Django command
-```must be exec in django container```
-- start app
-```sh
-python manage.py startapp 
-```
+## Settings
 
-# Setup Api Docs
-`settings.py`
+`settings.py` reads everything from the environment:
+
 ```python
-INSTALLED_APPS = [
-    ...
-    'drf_yasg',
-    ...
-]
-```
-`urls.py`
-```python
-from django.urls import re_path
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+SECRET_KEY = os.environ.get('DJANGO_SECRET')
+DEBUG = os.environ.get('STATE', None) == "dev"
 
-schema_view = get_schema_view(
-   openapi.Info(
-      title="Snippets API",
-      default_version='v1',
-      description="""<br><p>APP Name</p><br><br>SignIn to admin <a href="/admin/"> Admin page </a>""",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@snippets.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=[permissions.AllowAny],
-)
-
-urlpatterns += [
-   re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-   re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-   re_path(r'^$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-   
-]
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'),
+        'PORT': os.environ.get('POSTGRES_PORT'),
+    }
+}
 ```
 
-## config if use behide proxy
+## Behind a proxy / subpath
+
 ```python
 IS_BEHIND_PROXY = os.environ.get('IS_BEHIND_PROXY', 'False').lower() == 'true'
 
 if IS_BEHIND_PROXY:
-    # The subpath the app is served under (xxx.yyy.com/system)
     FORCE_SCRIPT_NAME = os.environ.get('FORCE_SCRIPT_NAME', '/system')
-    
-    # Static and Media must also respect the subpath prefix
     STATIC_URL = f'{FORCE_SCRIPT_NAME}/static/'
     MEDIA_URL = f'{FORCE_SCRIPT_NAME}/media/'
-    
-    # Tell Django to trust the Ingress Controller headers
     USE_X_FORWARDED_HOST = True
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 else:
-    # Standard local development settings
     FORCE_SCRIPT_NAME = None
 ```

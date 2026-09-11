@@ -1,0 +1,36 @@
+volumes:
+    media: {}
+    static: {}
+    db: {}
+
+services: 
+    db:
+        container_name: ${PROJECT_NAME}-db
+        image: postgres:17.5-alpine
+        volumes:
+          - db:/var/lib/postgresql/data
+        env_file:
+            - .env
+    backend:
+        container_name: ${PROJECT_NAME}-backend
+        build: ./backend
+        command: sh runserver.sh 4
+        volumes: 
+            - ./backend:/backend
+            - media:/var/www/media/
+            - static:/var/www/static/
+        env_file: 
+            - .env
+    nginx:
+        container_name: ${PROJECT_NAME}-nginx
+        image: nginx:1.25.2
+        ports:
+            - 8000:8000
+        volumes:
+            - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
+            - media:/var/www/media/
+            - static:/var/www/static/
+        env_file:
+            - .env
+        environment:
+            NGINX_ENVSUBST_TEMPLATE_SUFFIX: ".conf"

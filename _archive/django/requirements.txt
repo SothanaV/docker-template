@@ -1,0 +1,14 @@
+asgiref==3.10.0
+Django==5.2.8
+django-cors-headers==4.9.0
+djangorestframework==3.16.1
+drf-yasg==1.21.11
+gunicorn==23.0.0
+inflection==0.5.1
+packaging==25.0
+psycopg2-binary==2.9.11
+pytz==2025.2
+PyYAML==6.0.3
+setuptools==80.9.0
+sqlparse==0.5.3
+uritemplate==4.2.0

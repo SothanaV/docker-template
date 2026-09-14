@@ -1,0 +1,1 @@
+"pgbouncer_auth" "super_secret_auth_pw"

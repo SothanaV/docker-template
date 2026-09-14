@@ -1,0 +1,37 @@
+volumes:
+  db1: {}
+  db2: {}
+
+services: 
+  db1:
+    container_name: ${PROJECT_NAME}-db1
+    image: postgres:18.0-alpine
+    volumes:
+      - db1:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database01
+    ports:
+      - "15432:5432"
+    
+  db2:
+    container_name: ${PROJECT_NAME}-db2
+    image: postgres:18.0-alpine
+    volumes:
+      - db2:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: user2
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database02
+    ports:
+      - "25432:5432"
+  pgbouncer:
+    image: ghcr.io/cloudnative-pg/pgbouncer:latest
+    container_name: ${PROJECT_NAME}-pgbouncer
+    ports:
+      - "6432:6432"
+    volumes:
+      - ./pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    command: ["pgbouncer", "/etc/pgbouncer/pgbouncer.ini"]

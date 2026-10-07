@@ -1,0 +1,13 @@
+volumes:
+  node-red-data: {}
+services:
+  node-red:
+    image: nodered/node-red:latest
+    container_name: node-red
+    restart: unless-stopped
+    environment:
+      - TZ=UTC # Change to your local timezone, e.g., America/New_York
+    ports:
+      - "1880:1880"
+    volumes:
+      - node-red-data:/data

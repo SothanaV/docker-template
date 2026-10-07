@@ -69,6 +69,7 @@
 - langflow — see more [Langflow README.md](./langflow/README.md)
 - flowise — see more [Flowise README.md](./flowise/README.md)
 - n8n — see more [n8n README.md](./n8n/README.md)
+- nodered — see more [Node-RED README.md](./nodered/README.md)
 
 ## Databases & Tools
 - clickhouse (cluster) — see more [ClickHouse Cluster README.md](./clickhouse/cluster/README.md)

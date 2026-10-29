@@ -102,3 +102,9 @@ if IS_BEHIND_PROXY:
 else:
     FORCE_SCRIPT_NAME = None
 ```
+
+## Add Api docs if use django restframework
+- install
+```
+uv add drf-yasg
+```

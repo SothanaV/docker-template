@@ -16,3 +16,5 @@ env/
 *.sqlite3
 .env
 uv.lock
+staticfiles/
+media/
